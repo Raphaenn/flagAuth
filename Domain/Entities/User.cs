@@ -14,4 +14,12 @@ public class User
         this.Email = email;
         this.UserId = userId;
     }
+
+    internal User(string id, string name, string email, string userId)
+    {
+        this.Id = id;
+        this.Name = name;
+        this.Email = email;
+        this.UserId = userId;
+    }
 }

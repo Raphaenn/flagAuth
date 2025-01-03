@@ -20,6 +20,14 @@ public class InfraDbContext : DbContext
             entity.Property(uv => uv.Name).HasColumnName("name");
             entity.Property(uv => uv.Email).HasColumnName("email");
         });
+
+        modelBuilder.Entity<Login>(entity =>
+        {
+            entity.ToTable("login");
+            entity.HasKey(uv => uv.Id);
+        });
     }
+    
     public DbSet<UserView>? users_view { get; set; }
+    public DbSet<Login>? login { get; set; }
 }

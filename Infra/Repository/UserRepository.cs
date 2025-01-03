@@ -18,9 +18,14 @@ public class UserRepository : IUserRepository
     {
         if (_infraDbContext.users_view != null)
         {
-            UserView response = await _infraDbContext.users_view.FirstOrDefaultAsync(u => u.Email == email);
+            UserView? response = await _infraDbContext.users_view
+                .Where(u => u.Email == email)
+                .FirstOrDefaultAsync();
 
-            return new User(name: response.Name, email: response.Email, userId: "12312");
+            if (response != null)
+            {
+                return new User(name: response.Name, email: response.Email, userId: "12312");
+            }
         }
         return null;
     }

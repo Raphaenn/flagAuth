@@ -16,7 +16,13 @@ public class GetUserQueryHandlers : IRequestHandler<GetUserQuery, User>
 
     public async Task<User> Handle(GetUserQuery request, CancellationToken cancellationToken)
     {
-        User data = new User(name: "Raphael", email: request.Email, userId: request.UserId);
-        return await _userRepository.GetUser(data.Email);
+        User user = await _userRepository.GetUser(request.Email);
+
+        if (user == null)
+        {
+            throw new Exception("User not found.");
+        }
+
+        return user;
     }
 }

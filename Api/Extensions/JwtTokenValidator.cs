@@ -20,7 +20,6 @@ public static class JwtTokenValidator
                 ValidateIssuer = false,  // Depending on your needs, you can set this to true and set the valid issuer
                 ValidateAudience = false, // Similarly, set to true and define valid audience if required
                 ValidateLifetime = false,  // Set this to true to validate the token's expiration
-                ClockSkew = TimeSpan.Zero // Adjust this if you need to account for clock skew
             };
 
             // Validate the token
@@ -37,8 +36,7 @@ public static class JwtTokenValidator
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Token validation failed: " + ex.Message);
-            return null;
+            throw new Exception("Validation token failure");
         }
     }
 }
