@@ -1,5 +1,6 @@
 using App.Auth.Commands;
 using App.IRepository;
+using App.Services;
 using Domain;
 using Domain.Entities;
 using MediatR;
@@ -19,7 +20,8 @@ public class CreateAuthCHandle : IRequestHandler<CreateAuthCommand, string>
     {
         try
         {
-            User userData = UserUseCase.CreateWithExistingId(request.Id, request.Email, request.Email, request.UserId);
+            Console.WriteLine(request.Id);
+            User userData = UserUseCase.CreateWithExistingId(request.Id, request.Name, request.Email);
             string token = await TokenGenerator.CreateToken(userData);
             await _authRepository.CreateSocialAuth(userData, token);
             return token;
@@ -27,8 +29,7 @@ public class CreateAuthCHandle : IRequestHandler<CreateAuthCommand, string>
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
-            throw new Exception("Invalid requesrt");
+            throw new Exception("Invalid request");
         }
     }
 }

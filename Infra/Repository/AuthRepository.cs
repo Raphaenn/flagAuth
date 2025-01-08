@@ -31,23 +31,24 @@ public class AuthRepository : IAuthRepository
     //     return response;
     // }
 
-    public async Task CreateSocialAuth(User user, string token)
+    public async Task CreateSocialAuth(User user, String token)
     {
         try
         {
             Login login = new Login
             {
-                Id = null,
-                Token = null,
-                UserId = null,
-                ExpireAt = default,
-                CreatedAt = default
+                Id = Guid.NewGuid(),
+                Token = token,
+                UserId = Guid.Parse(user.Id),
+                ExpireAt = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow
             };
             await _infraDbContext.login.AddAsync(login);
             await _infraDbContext.SaveChangesAsync();
         }
-        catch
+        catch (Exception e)
         {
+            Console.WriteLine(e.ToString());
             throw new Exception("Db error");
         }
     }

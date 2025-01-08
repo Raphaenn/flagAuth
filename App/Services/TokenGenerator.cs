@@ -4,7 +4,7 @@ using System.Text;
 using Domain.Entities;
 using Microsoft.IdentityModel.Tokens;
 
-namespace App.Auth.CommandHandlers;
+namespace App.Services;
 
 public static class TokenGenerator
 {
@@ -18,10 +18,9 @@ public static class TokenGenerator
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(ClaimTypes.Role, "regular"),
+            new Claim("role", "regular"),
+            new Claim(ClaimTypes.Name, user.Name) // Claim customizada
         };
-            // new Claim("custom_claim", "custom_value") // Claim customizada
-
 
         var token = new JwtSecurityToken(
             issuer: "flags_user.com",

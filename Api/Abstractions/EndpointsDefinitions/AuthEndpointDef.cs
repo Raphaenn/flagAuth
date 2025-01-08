@@ -21,7 +21,6 @@ public class AuthEndpointDef : IEndpointsDefinitions
             {
                 return Results.Unauthorized();
             }
-            
             token = token.Substring("Bearer ".Length).Trim();
 
             try
@@ -30,9 +29,9 @@ public class AuthEndpointDef : IEndpointsDefinitions
                 var validatedClaims = JwtTokenValidator.ValidateJwtToken(token, publicKey);
 
                 // Extract the email claim (assuming it's named "email")
-                var emailClaim = validatedClaims.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value;
+                var emailClaim = validatedClaims.FindFirst("emailAddress")?.Value;
 
-                if (emailClaim is null)
+                if (emailClaim == null)
                 {
                     return Results.BadRequest("Invalid token data");
                 }
@@ -43,10 +42,10 @@ public class AuthEndpointDef : IEndpointsDefinitions
                     Email = emailClaim
                 };
                 
-                User postData = await mediator.Send(userQuery);
+                User? userData = await mediator.Send(userQuery);
 
                 // Validate if user exists
-                if (postData != null)
+                if (userData == null)
                 {
                     return Results.BadRequest("User not found");
                 }
@@ -54,13 +53,13 @@ public class AuthEndpointDef : IEndpointsDefinitions
                 // create the real auth token
                 CreateAuthCommand createToken = new CreateAuthCommand
                 {
-                    Id = postData.Id,
-                    Email = postData.Email,
-                    UserId = postData.UserId
+                    Id = userData.Id,
+                    Email = userData.Email,
+                    Name = userData.Name
                 };
                 string createdToken = await mediator.Send(createToken);
 
-                Result res = new Result(postData, createdToken);
+                Result res = new Result(userData, createdToken);
                 
                 return Results.Ok(res);
             }

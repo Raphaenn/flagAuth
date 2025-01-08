@@ -9,8 +9,8 @@ public static class UserUseCase
         return new User(name, email, userId);
     }
 
-    public static User CreateWithExistingId(string id, string name, string email, string userId)
+    public static User CreateWithExistingId(string id, string name, string email)
     {
-        return new User(id, name, email, userId);
+        return new User(id, name, email);
     }
 }

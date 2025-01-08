@@ -40,7 +40,6 @@ app.Use(async (ctx, next) =>
     }
     catch (Exception e)
     {
-        Console.WriteLine(e.Message);
         ctx.Response.StatusCode = 500;
         await ctx.Response.WriteAsync("An error ocurred");
     }

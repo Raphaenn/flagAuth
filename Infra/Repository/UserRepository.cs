@@ -24,7 +24,7 @@ public class UserRepository : IUserRepository
 
             if (response != null)
             {
-                return new User(name: response.Name, email: response.Email, userId: "12312");
+                return new User(id: response.Id.ToString(), name: response.Name, email: response.Email);
             }
         }
         return null;

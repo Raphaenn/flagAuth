@@ -15,8 +15,8 @@ public class InfraDbContext : DbContext
         modelBuilder.Entity<UserView>(entity =>
         {
             entity.ToTable("users_view");
-            // entity.HasKey(uv => uv.Id);
             entity.HasNoKey();
+            entity.Property(uv => uv.Id).HasColumnName("id");
             entity.Property(uv => uv.Name).HasColumnName("name");
             entity.Property(uv => uv.Email).HasColumnName("email");
         });
@@ -25,6 +25,15 @@ public class InfraDbContext : DbContext
         {
             entity.ToTable("login");
             entity.HasKey(uv => uv.Id);
+            entity.Property(uv => uv.Id)
+                .HasColumnName("id")
+                .HasColumnType("uuid");
+            entity.Property(uv => uv.UserId)
+                .HasColumnName("user_id")
+                .HasColumnType("uuid");
+            entity.Property(uv => uv.Token).HasColumnName("token");
+            entity.Property(uv => uv.ExpireAt).HasColumnName("expire_at");
+            entity.Property(uv => uv.CreatedAt).HasColumnName("created_at");
         });
     }
     

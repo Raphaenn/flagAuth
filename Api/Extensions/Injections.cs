@@ -12,6 +12,7 @@ public static class Injections
     {
         serviceCollection.AddDbContext<InfraDbContext>();
         serviceCollection.AddScoped<IUserRepository, UserRepository>();
+        serviceCollection.AddScoped<IAuthRepository, AuthRepository>();
         
         serviceCollection.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetUserQuery).Assembly));
 
