@@ -1,5 +1,6 @@
 using App.IRepository;
 using Domain.Entities;
+using Infra.Mappers;
 using Infra.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,9 +25,17 @@ public class UserRepository : IUserRepository
 
             if (response != null)
             {
-                return new User(id: response.Id.ToString(), name: response.Name, email: response.Email);
+                return new User(name: response.Name, email: response.Email);
             }
         }
         return null;
+    }
+
+    public async Task<Guid> CreateUser(User user)
+    {
+        var request = UserMapper.ToEntity(user);
+        await _infraDbContext.save_user.AddAsync(request);
+        await _infraDbContext.SaveChangesAsync();
+        return user.Id;
     }
 }

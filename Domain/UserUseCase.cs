@@ -6,11 +6,11 @@ public static class UserUseCase
 {
     public static User CreateNewUser(string name, string email, string userId)
     {
-        return new User(name, email, userId);
+        return new User(name, email);
     }
 
-    public static User CreateWithExistingId(string id, string name, string email)
+    public static User CreateWithExistingId(Guid id, string name, string email)
     {
-        return new User(id, name, email);
+        return new User(name, email);
     }
 }

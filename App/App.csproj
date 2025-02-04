@@ -16,8 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Users\CommandsHandlers\" />
-      <Folder Include="Users\Commands\" />
+      <Folder Include="Friendship\" />
     </ItemGroup>
 
 </Project>

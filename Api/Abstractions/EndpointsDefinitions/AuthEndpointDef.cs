@@ -3,6 +3,7 @@ using App.Users.Queries;
 using MediatR;
 using Api.Extensions;
 using App.Auth.Commands;
+using App.Auth.DTOs;
 using Domain.Entities;
 
 namespace Api.Abstractions.EndpointsDefinitions;
@@ -70,8 +71,26 @@ public class AuthEndpointDef : IEndpointsDefinitions
            
         });
 
-        app.MapPost("auth/create", async () =>
+        app.MapPost("/auth/signup", async (HttpContext context, IMediator mediator) =>
         {
+            // receber email e name
+            var request = await context.Request.ReadFromJsonAsync<SignUpRequest>();
+            
+            GetUserQuery userQuery = new GetUserQuery
+            {
+                Email = request.Email
+            };
+            User? userData = await mediator.Send(userQuery);
+
+            if (userData != null)
+            {
+                return Results.BadRequest("User already exists");
+            }
+            
+            // Criar um user
+            
+            // retornar token com email e nome
+            
             return Results.Ok();
         });
     }

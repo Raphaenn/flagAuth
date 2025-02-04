@@ -20,7 +20,6 @@ public class CreateAuthCHandle : IRequestHandler<CreateAuthCommand, string>
     {
         try
         {
-            Console.WriteLine(request.Id);
             User userData = UserUseCase.CreateWithExistingId(request.Id, request.Name, request.Email);
             string token = await TokenGenerator.CreateToken(userData);
             await _authRepository.CreateSocialAuth(userData, token);

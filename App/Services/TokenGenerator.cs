@@ -16,7 +16,7 @@ public static class TokenGenerator
         // Define claims
         var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim("role", "regular"),
             new Claim(ClaimTypes.Name, user.Name) // Claim customizada

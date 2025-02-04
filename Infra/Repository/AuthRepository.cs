@@ -39,7 +39,7 @@ public class AuthRepository : IAuthRepository
             {
                 Id = Guid.NewGuid(),
                 Token = token,
-                UserId = Guid.Parse(user.Id),
+                UserId = user.Id,
                 ExpireAt = DateTime.UtcNow,
                 CreatedAt = DateTime.UtcNow
             };
