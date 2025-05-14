@@ -7,7 +7,8 @@ string secretKey = "esta-e-uma-chave-secreta-de-32-bits";
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddJwtAuthentication();
+builder.Services.AddJwtAuthenticationAlternative(secretKey);
+// builder.Services.AddJwtAuthentication(secretKey);
 builder.Services.RegisterServices();
 builder.Services.AddEndpointsApiExplorer();
 
@@ -17,13 +18,12 @@ builder.Services.AddOpenApiDocument(config =>
     config.Title = "FlagUsers v1";
     config.Version = "v1";
 
-    config.AddSecurity("Bearer", new OpenApiSecurityScheme()
+    config.AddSecurity("JWT", new OpenApiSecurityScheme()
     {
         Type = OpenApiSecuritySchemeType.ApiKey,
         Name = "Authorization",
         In = OpenApiSecurityApiKeyLocation.Header,
         Description = "Insira o token JWT no formato: Bearer {seu-token-jwt}"
-        
     });
     
     // Configuração para exigir o token JWT em rotas protegidas
@@ -41,7 +41,7 @@ app.Use(async (ctx, next) =>
     catch (Exception e)
     {
         ctx.Response.StatusCode = 500;
-        await ctx.Response.WriteAsync("An error ocurred");
+        await ctx.Response.WriteAsync($"An error ocurred, {e.Message}");
     }
 });
 
@@ -57,7 +57,9 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
 app.RegisterEndpointsDefinitions();
 
 app.Run();

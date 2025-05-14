@@ -33,9 +33,17 @@ public class UserRepository : IUserRepository
 
     public async Task<Guid> CreateUser(User user)
     {
-        var request = UserMapper.ToEntity(user);
-        await _infraDbContext.save_user.AddAsync(request);
-        await _infraDbContext.SaveChangesAsync();
-        return user.Id;
+        try
+        {
+            var request = UserMapper.ToEntity(user);
+            await _infraDbContext.users.AddAsync(request);
+            await _infraDbContext.SaveChangesAsync();
+            return user.Id;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw new Exception(e.Message);
+        }
     }
 }

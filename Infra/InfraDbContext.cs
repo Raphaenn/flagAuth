@@ -7,7 +7,7 @@ public class InfraDbContext : DbContext
 {
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Username=admin;Password=1234;Database=couplegame;");
+        optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Username=admin;Password=1234;Database=flags;");
     }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -50,7 +50,7 @@ public class InfraDbContext : DbContext
         
         modelBuilder.Entity<UserView>(entity =>
         {
-            entity.ToTable("save_user");
+            entity.ToTable("users");
             entity.HasKey(uv => uv.Id);
             entity.Property(uv => uv.Id).HasColumnName("id");
             entity.Property(uv => uv.Name).HasColumnName("name");
@@ -64,7 +64,7 @@ public class InfraDbContext : DbContext
     }
     
     public DbSet<UserView>? users_view { get; set; }
-    public DbSet<UserView>? save_user { get; set; }
+    public DbSet<UserView>? users { get; set; }
     public DbSet<Login>? login { get; set; }
     public DbSet<FriendsDbModel>? friends { get; set; }
 }

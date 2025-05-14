@@ -9,6 +9,7 @@ public static class JwtTokenValidator
 {
     public static ClaimsPrincipal ValidateJwtToken(string token, RSA publicKey)
     {
+        // what is it?
         var tokenHandler = new JwtSecurityTokenHandler();
         
         try
@@ -36,6 +37,7 @@ public static class JwtTokenValidator
         }
         catch (Exception ex)
         {
+            Console.WriteLine(ex.Message);
             throw new Exception("Validation token failure");
         }
     }

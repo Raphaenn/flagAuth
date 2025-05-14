@@ -9,12 +9,17 @@ public class UserEndpointDef : IEndpointsDefinitions
 {
     public void RegisterEndpoints(WebApplication app)
     {
-        app.MapPost("/user/create", async (HttpContext context, IMediator mediator) =>
+        app.MapPost("/users/create", async (HttpContext context, IMediator mediator) =>
         {
             var request = await context.Request.ReadFromJsonAsync<CreateUserRequest>();
             CreateUserCommand userCmd = new CreateUserCommand(request.Email, request.Name);
-            Guid response = await mediator.Send(userCmd);
+            User response = await mediator.Send(userCmd);
             return Results.Ok(response);
+        }).AllowAnonymous();
+
+        app.MapGet("/users/check-email", (HttpContext context, IMediator mediator) =>
+        {
+            
         });
     }
 }

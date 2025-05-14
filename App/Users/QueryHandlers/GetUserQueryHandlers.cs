@@ -5,7 +5,7 @@ using MediatR;
 
 namespace App.Users.QueryHandlers;
 
-public class GetUserQueryHandlers : IRequestHandler<GetUserQuery, User>
+public class GetUserQueryHandlers : IRequestHandler<GetUserQuery, User?>
 {
     private readonly IUserRepository _userRepository;
 
@@ -14,13 +14,13 @@ public class GetUserQueryHandlers : IRequestHandler<GetUserQuery, User>
         _userRepository = userRepository;
     }
 
-    public async Task<User> Handle(GetUserQuery request, CancellationToken cancellationToken)
+    public async Task<User?> Handle(GetUserQuery request, CancellationToken cancellationToken)
     {
-        User user = await _userRepository.GetUser(request.Email);
+        User? user = await _userRepository.GetUser(request.Email);
 
         if (user == null)
         {
-            throw new Exception("User not found.");
+            return null;
         }
 
         return user;

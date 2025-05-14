@@ -5,7 +5,7 @@ using MediatR;
 
 namespace App.Users.CommandsHandlers;
 
-public class CreateUserCmdHandler : IRequestHandler<CreateUserCommand, Guid>
+public class CreateUserCmdHandler : IRequestHandler<CreateUserCommand, User>
 {
     private readonly IUserRepository _userRepository;
 
@@ -14,10 +14,10 @@ public class CreateUserCmdHandler : IRequestHandler<CreateUserCommand, Guid>
         _userRepository = userRepository;
     }
     
-    public async Task<Guid> Handle(CreateUserCommand createUserCommand, CancellationToken cancellationToken)
+    public async Task<User> Handle(CreateUserCommand createUserCommand, CancellationToken cancellationToken)
     {
         User user = new User(email: createUserCommand.Email, name: createUserCommand.Name);
-        Guid response = await _userRepository.CreateUser(user);
-        return response;
+        await _userRepository.CreateUser(user);
+        return user;
     }
 }

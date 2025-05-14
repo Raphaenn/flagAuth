@@ -22,6 +22,6 @@ public static class UserMapper
 
     public static User ToDomain(UserView entity)
     {
-        return new User(entity.Name, entity.Email);
+        return new User(entity.Email, entity.Name);
     }
 }

@@ -23,6 +23,12 @@
     </ItemGroup>
 
     <ItemGroup>
+        <None Update="Keys\publicClerk.pem">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\Infra\Infra.csproj" />
     </ItemGroup>
 

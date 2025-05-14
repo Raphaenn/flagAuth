@@ -25,15 +25,13 @@ public class User
     public SexualOrientations? SexualOrientation { get; private set; }
     
     
-    public User(string name, string email)
+    public User(string email, string name)
     {
         this.Id = Guid.NewGuid();
-        this.Name = name;
         this.Email = email;
+        this.Name = name;
     }
 
-    internal User() {}
-    
     public void ChooseSex(Sexualities sexuality)
     {
         this.Sexuality = sexuality;
