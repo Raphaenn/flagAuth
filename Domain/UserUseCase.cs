@@ -4,13 +4,21 @@ namespace Domain;
 
 public static class UserUseCase
 {
-    public static User CreateNewUser(string name, string email, string userId)
+    public static User CreateNewUser(string name, string email)
     {
-        return new User(name, email);
+        return User.Create(email: email, name, null, null, null, null, null, null);
     }
 
-    public static User CreateWithExistingId(Guid id, string name, string email)
+    public static User CreateWithExistingId(Guid id, string email)
     {
-        return new User(name, email);
+        return User.Rehydrate(id: id,
+            email: email,
+            name: null,
+            birthdate: null,
+            country: null,
+            city: null,
+            sexuality: null,
+            sexualOrientation: null,
+            password: null);
     }
 }

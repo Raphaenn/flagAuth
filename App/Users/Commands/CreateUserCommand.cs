@@ -3,4 +3,4 @@ using MediatR;
 
 namespace App.Users.Commands;
 
-public record struct CreateUserCommand(string Email, string Name) : IRequest<User>;
+public record struct CreateUserCommand(string Email) : IRequest<User>;

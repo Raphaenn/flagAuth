@@ -20,15 +20,14 @@ public class CreateAuthCHandle : IRequestHandler<CreateAuthCommand, string>
     {
         try
         {
-            User userData = UserUseCase.CreateWithExistingId(request.Id, request.Name, request.Email);
+            User userData = UserUseCase.CreateWithExistingId(request.Id, request.Email);
             string token = await TokenGenerator.CreateToken(userData);
             await _authRepository.CreateSocialAuth(userData, token);
             return token;
-
         }
         catch (Exception e)
         {
-            throw new Exception("Invalid request");
+            throw new Exception(e.Message);
         }
     }
 }

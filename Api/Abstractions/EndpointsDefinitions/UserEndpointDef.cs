@@ -12,7 +12,7 @@ public class UserEndpointDef : IEndpointsDefinitions
         app.MapPost("/users/create", async (HttpContext context, IMediator mediator) =>
         {
             var request = await context.Request.ReadFromJsonAsync<CreateUserRequest>();
-            CreateUserCommand userCmd = new CreateUserCommand(request.Email, request.Name);
+            CreateUserCommand userCmd = new CreateUserCommand(request.Email);
             User response = await mediator.Send(userCmd);
             return Results.Ok(response);
         }).AllowAnonymous();

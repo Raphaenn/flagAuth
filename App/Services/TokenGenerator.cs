@@ -19,12 +19,12 @@ public static class TokenGenerator
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim("role", "regular"),
-            new Claim(ClaimTypes.Name, user.Name) // Claim customizada
+            // new Claim(ClaimTypes.Name, user.Name) // Claim customizada
         };
 
         var token = new JwtSecurityToken(
-            issuer: "flags_user.com",
-            audience: "com.raphaelneves17.flags",
+            issuer: "https://correct-magpie-48.clerk.accounts.dev",
+            audience: "theflags.app",
             claims: claims,
             expires: DateTime.Now.AddMinutes(30),
             signingCredentials: creds);

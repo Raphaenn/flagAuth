@@ -6,13 +6,21 @@ using App.Auth.Commands;
 using App.Auth.DTOs;
 using App.Users.Commands;
 using Domain.Entities;
-using YamlDotNet.Core.Tokens;
+using Microsoft.AspNetCore.Identity;
 
 namespace Api.Abstractions.EndpointsDefinitions;
 
 public class AuthEndpointDef : IEndpointsDefinitions
 {
     private record Result(User User, string Token);
+
+    private record VerifyRequest(string Email);
+    
+    private record LoginRequest(string Email, string? Password);
+
+    private record VerifyUserResponse(User? User, string AccStatus, string? Token);
+    
+    private record UpdatePhoneRequest(string Token, string Url1, string Url2, string Url3);
     
     public void RegisterEndpoints(WebApplication app)
     {
@@ -95,7 +103,7 @@ public class AuthEndpointDef : IEndpointsDefinitions
                 }
             
                 // create new user
-                CreateUserCommand userCmd = new CreateUserCommand(request.Email, request.Name);
+                CreateUserCommand userCmd = new CreateUserCommand(request.Email);
                 User response = await mediator.Send(userCmd);
             
                 // Create a session token
@@ -103,7 +111,6 @@ public class AuthEndpointDef : IEndpointsDefinitions
                 {
                     Id = response.Id,
                     Email = request.Email,
-                    Name = request.Name
                 };
                 string createdToken = await mediator.Send(createToken);
                 
@@ -118,6 +125,191 @@ public class AuthEndpointDef : IEndpointsDefinitions
                 // return Results.Created($"/users/{user.id}", new { user });
             
                 return Results.Created("/auth/signup", new Result(User: response, Token: createdToken));
+            }
+            catch (Exception e)
+            {
+                return Results.BadRequest(e.Message);
+            }
+        });
+
+        app.MapPost("/auth/verify", async (HttpContext context, IMediator mediator) =>
+        {
+            try
+            {
+                var request = await context.Request.ReadFromJsonAsync<VerifyRequest>();
+
+                if (request.Email == null)
+                {
+                    return Results.BadRequest("Invalid email");
+                }
+
+                GetUserQuery getUserQuery = new GetUserQuery
+                {
+                    Email = request.Email
+                };
+
+                User user = await mediator.Send(getUserQuery);
+
+                
+                // return an specific acc status if user wasn't registered
+                if (user == null)
+                {
+                    return Results.Ok(new VerifyUserResponse(User: null, AccStatus: "needRegisterAccount", Token: null));
+                }
+
+                // if user exists and isn't incomplete
+                if (user.Name is null)
+                {
+                    CreateAuthCommand createSession = new CreateAuthCommand
+                    {
+                        Id = user.Id,
+                        Email = user.Email,
+                        Name = user.Name
+                    };
+
+                    string createdSession = await mediator.Send(createSession);
+                    return Results.Created("/auth/verify", new VerifyUserResponse(User: user, AccStatus: "incompleteAccount", Token: createdSession));
+                }
+                
+                return Results.Ok(new VerifyUserResponse(User: user, AccStatus: "completeAccount", Token: null));
+            }
+            catch (Exception e)
+            {
+                return Results.BadRequest(e.Message);
+            }
+        });
+        
+        app.MapPost("/auth/signin/email", async (HttpContext context, IMediator mediator) =>
+        {
+            try
+            {
+                LoginRequest request = await context.Request.ReadFromJsonAsync<LoginRequest>();
+
+                GetUserQuery userQuery = new GetUserQuery
+                {
+                    Email = request.Email
+                };
+
+                User? user = await mediator.Send(userQuery);
+
+                if (user == null)
+                {
+                    return Results.BadRequest("User not found");
+                }
+                
+                CreateAuthCommand createToken = new CreateAuthCommand
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                };
+                
+                string createdToken = await mediator.Send(createToken);
+            
+                Result res = new Result(user, createdToken);
+                
+                return Results.Ok(res);
+            }
+            catch (Exception e)
+            {
+                return Results.BadRequest(e.Message);
+            }
+        });
+        
+        app.MapPost("/auth/signin/email-password", async (HttpContext context, IMediator mediator) =>
+        {
+            try
+            {
+                LoginRequest request = await context.Request.ReadFromJsonAsync<LoginRequest>();
+
+                GetUserQuery userQuery = new GetUserQuery
+                {
+                    Email = request.Email
+                };
+
+                User? user = await mediator.Send(userQuery);
+
+                if (user == null || user.Password == null)
+                {
+                    return Results.Unauthorized();;
+                }
+
+                Console.WriteLine(request.Password);
+                var hasher = new PasswordHasher<object>();
+                var result = hasher.VerifyHashedPassword(null, user.Password, request.Password);
+
+                if (result == PasswordVerificationResult.Failed)
+                {
+                    return Results.Unauthorized();
+                }
+                
+                CreateAuthCommand createToken = new CreateAuthCommand
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                };
+                
+                string createdToken = await mediator.Send(createToken);
+            
+                Result res = new Result(user, createdToken);
+                
+                return Results.Ok(res);
+            }
+            catch (Exception e)
+            {
+                return Results.BadRequest(e.Message);
+            }
+        });
+
+        app.MapPost("/auth/complete", async (HttpContext context, IMediator mediator) =>
+        {
+            try
+            {
+                var request = await context.Request.ReadFromJsonAsync<CompleteUserRequest>();
+                
+                if (string.IsNullOrWhiteSpace(request.Password))
+                    return Results.BadRequest("Senha não pode ser vazia.");
+
+
+                if (request is null || request.Id is null)
+                {
+                    return Results.Unauthorized();
+                }
+                
+                var hasher = new PasswordHasher<object>();
+                string passwordHash = hasher.HashPassword(null, request.Password);
+
+                UpdateUserCommand completeUser = new UpdateUserCommand
+                {
+                    Id = request.Id,
+                    Name = request.Name,
+                    BrithDate = request.BrithDate,
+                    Country = request.Country,
+                    City = request.City,
+                    Sexuality = request.Sexuality,
+                    SexualOrientation = request.SexualOrientation,
+                    Password = passwordHash
+                };
+
+                User user = await mediator.Send(completeUser);
+
+                return Results.Ok(user);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        });
+
+        app.MapPost("/auth/update-photos", async (HttpContext context, IMediator mediator) =>
+        {
+            try
+            {
+                var request = await context.Request.ReadFromJsonAsync<UpdatePhoneRequest>();
+                string userEmail = context.User.FindFirst("emailAddress")?.Value;
+                
+                // call command to send photos
+                
+                return Results.Ok();
             }
             catch (Exception e)
             {

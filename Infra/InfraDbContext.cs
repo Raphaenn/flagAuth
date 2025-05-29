@@ -15,10 +15,17 @@ public class InfraDbContext : DbContext
         modelBuilder.Entity<UserView>(entity =>
         {
             entity.ToTable("users_view");
-            entity.HasNoKey();
+            entity.HasKey(uv => uv.Id);
             entity.Property(uv => uv.Id).HasColumnName("id");
             entity.Property(uv => uv.Name).HasColumnName("name");
             entity.Property(uv => uv.Email).HasColumnName("email");
+            entity.Property(uv => uv.Email).HasColumnName("email");
+            entity.Property(uv => uv.Country).HasColumnName("country");
+            entity.Property(uv => uv.City).HasColumnName("city");
+            entity.Property(uv => uv.Birthdate).HasColumnName("birthdate");
+            entity.Property(uv => uv.Sexuality).HasColumnName("sexuality");
+            entity.Property(uv => uv.SexualOrientation).HasColumnName("sexual_orientation");
+            entity.Property(uv => uv.Password).HasColumnName("password");
         });
 
         modelBuilder.Entity<Login>(entity =>
@@ -60,6 +67,7 @@ public class InfraDbContext : DbContext
             entity.Property(uv => uv.Birthdate).HasColumnName("birthdate");
             entity.Property(uv => uv.Sexuality).HasColumnName("sexuality");
             entity.Property(uv => uv.SexualOrientation).HasColumnName("sexual_orientation");
+            entity.Property(uv => uv.Password).HasColumnName("password");
         });
     }
     

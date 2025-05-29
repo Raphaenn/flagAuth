@@ -2,73 +2,124 @@ namespace Domain.Entities;
 
 public enum SexualOrientations
 {
-    Heterosexual,
-    Homosexual,
-    Bisexual,
+    Heterosexual = 0,
+    Homosexual = 1,
+    Bisexual = 2,
 }
 
 public enum Sexualities
 {
-    Woman,
-    Men,
+    Female = 0,
+    Male = 1,
 }
 
 public class User
 {
     public Guid Id { get; private set; }
-    public string Name { get; private set; }
     public string Email { get; private set; }
+    public string? Name { get; private set; }
     public DateTime? Birthdate { get; private set; }
     public string? Country { get; private set; }
     public string? City { get; private set; }
     public Sexualities? Sexuality { get; private set; }
     public SexualOrientations? SexualOrientation { get; private set; }
-    
-    
-    public User(string email, string name)
+    public string? Password { get; private set; }
+
+    public static User Rehydrate(
+        Guid id,
+        string email,
+        string? name,
+        DateTime? birthdate,
+        string? country,
+        string? city,
+        Sexualities? sexuality,
+        SexualOrientations? sexualOrientation,
+        string? password)
     {
-        this.Id = Guid.NewGuid();
-        this.Email = email;
-        this.Name = name;
+        return new User(id, email, name, birthdate, country, city, sexuality, sexualOrientation, password);
     }
 
-    public void ChooseSex(Sexualities sexuality)
+    private User(
+        Guid id,
+        string email,
+        string? name,
+        DateTime? birthdate,
+        string? country,
+        string? city,
+        Sexualities? sexuality,
+        SexualOrientations? sexualOrientation,
+        string? password)
     {
-        this.Sexuality = sexuality;
+        Id = id;
+        Email = email;
+        Name = name;
+        Birthdate = ValidateBirthdate(birthdate);
+        Country = ValidateLocation(country);
+        City = ValidateLocation(city);
+        Sexuality = sexuality;
+        SexualOrientation = sexualOrientation;
+        Password = password;
+    } 
+    
+    public static User Create(
+        string email,
+        string? name,
+        DateTime? birthdate,
+        string? country,
+        string? city,
+        Sexualities? sexuality,
+        SexualOrientations? sexualOrientation,
+        string? password)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            throw new ArgumentException("Email is required.");
+
+        return new User(
+            Guid.NewGuid(),
+            email,
+            name,
+            birthdate,
+            country,
+            city,
+            sexuality,
+            sexualOrientation,
+            password);
     }
     
-    public void SelectCountryAndCity(string country, string city)
+    private static string ValidateLocation(string value)
     {
-        if (string.IsNullOrEmpty(country) || string.IsNullOrEmpty(city))
+        return value;
+    }
+    
+    private static DateTime? ValidateBirthdate(DateTime? birthdate)
+    {
+        if (birthdate == null)
         {
-            throw new ArgumentException("Both Country and city must be informed");
+            return null;
         }
-        
-        this.Country = country;
-        this.City = city;
+        var birthdateUtc = DateTime.SpecifyKind((DateTime)birthdate, DateTimeKind.Utc);
+        var today = DateTime.UtcNow;
+
+        int age = today.Year - birthdateUtc.Year;
+        if (birthdateUtc.Date > today.AddYears(-age)) age--;
+
+        if (age < 18)
+            throw new ArgumentException("User must be older than 18");
+
+        return birthdateUtc;
     }
 
-    public void ChooseSexualOrientation(SexualOrientations sexualOrientations)
+    public void UpdateUser(string newName, DateTime birth, SexualOrientations sexualOrientation, Sexualities sexuality, string country, string city, string password)
     {
-        this.SexualOrientation = sexualOrientations;
-    }
-    
-    public void InfoBirthdate(DateTime birthdate)
-    {
-        DateTime today = DateTime.Today;
-        int age = today.Year - birthdate.Year;
-        if (birthdate.Date > today.AddYears(-age))
-        {
-            age--;
-        }
+        if (string.IsNullOrWhiteSpace(newName))
+            throw new ArgumentException("Name is required.");
 
-        bool isAdult = age >= 18;
-        
-        if (!isAdult)
-        {
-            throw new ArgumentException("User must be older then 18");
-        }
-
-        this.Birthdate = birthdate;
+        Name = newName;
+        Birthdate = ValidateBirthdate(birth);
+        Country = ValidateLocation(country);
+        City = ValidateLocation(city);
+        Sexuality = sexuality;
+        SexualOrientation = sexualOrientation;
+        Password = password;
     }
 }

@@ -7,7 +7,7 @@ string secretKey = "esta-e-uma-chave-secreta-de-32-bits";
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddJwtAuthenticationAlternative(secretKey);
+builder.Services.AddJwtAuthenticationAlternative();
 // builder.Services.AddJwtAuthentication(secretKey);
 builder.Services.RegisterServices();
 builder.Services.AddEndpointsApiExplorer();
