@@ -24,7 +24,7 @@ public class AuthEndpointDef : IEndpointsDefinitions
     
     public void RegisterEndpoints(WebApplication app)
     {
-        app.MapGet("/auth/signin", async (HttpContext context, IMediator mediator) =>
+        app.MapGet("/auth/social-signup", async (HttpContext context, IMediator mediator) =>
         {
             Console.WriteLine("cai aqui");
             foreach (var us in context.User.Claims)
@@ -81,7 +81,7 @@ public class AuthEndpointDef : IEndpointsDefinitions
              }
         }).RequireAuthorization();
 
-        app.MapPost("/auth/signup", async (HttpContext context, IMediator mediator) =>
+        app.MapPost("/auth/email-signup", async (HttpContext context, IMediator mediator) =>
         {
             try
             {
@@ -233,7 +233,6 @@ public class AuthEndpointDef : IEndpointsDefinitions
                     return Results.Unauthorized();;
                 }
 
-                Console.WriteLine(request.Password);
                 var hasher = new PasswordHasher<object>();
                 var result = hasher.VerifyHashedPassword(null, user.Password, request.Password);
 
