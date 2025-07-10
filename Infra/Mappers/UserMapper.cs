@@ -31,7 +31,12 @@ public static class UserMapper
             city: entity.City,
             sexuality: Enum.TryParse<Sexualities>(entity.Sexuality, out var sex) ? sex : null,
             sexualOrientation: Enum.TryParse<SexualOrientations>(entity.SexualOrientation, out var orientation) ? orientation : null,
-            password: entity.Password);
+            password: entity.Password,
+            height: entity.Height,
+            weight: entity.Weight,
+            latitude: entity.Latitude,
+            longitude: entity.Longitude
+            );
 
         // Access private setters via reflection or use internal constructor if available
         typeof(User).GetProperty(nameof(User.Id))?.SetValue(user, entity.Id);

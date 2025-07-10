@@ -1,5 +1,6 @@
 using App.Users.Commands;
 using App.Users.DTOs;
+using App.Users.Queries;
 using Domain.Entities;
 using MediatR;
 
@@ -17,9 +18,12 @@ public class UserEndpointDef : IEndpointsDefinitions
             return Results.Ok(response);
         }).AllowAnonymous();
 
-        app.MapGet("/users/check-email", (HttpContext context, IMediator mediator) =>
+        app.MapGet("/users/refresh/info", async (HttpContext context, IMediator mediator) =>
         {
-            
+            var request = await context.Request.ReadFromJsonAsync<CreateUserRequest>();
+            GetUserByIdQuery userQuery = new GetUserByIdQuery(request.Id);
+            User response = await mediator.Send(userQuery);
+            return response;
         });
     }
 }

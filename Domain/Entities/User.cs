@@ -24,6 +24,10 @@ public class User
     public Sexualities? Sexuality { get; private set; }
     public SexualOrientations? SexualOrientation { get; private set; }
     public string? Password { get; private set; }
+    public double? Height { get; private set; }
+    public double? Weight { get; private set; }
+    public double? Latitude { get; private set; }
+    public double? Longitude { get; private set; }
 
     public static User Rehydrate(
         Guid id,
@@ -34,9 +38,14 @@ public class User
         string? city,
         Sexualities? sexuality,
         SexualOrientations? sexualOrientation,
-        string? password)
+        string? password,
+        double? height,
+        double? weight,
+        double? latitude,
+        double? longitude
+        )
     {
-        return new User(id, email, name, birthdate, country, city, sexuality, sexualOrientation, password);
+        return new User(id, email, name, birthdate, country, city, sexuality, sexualOrientation, password, height, weight, latitude, longitude);
     }
 
     private User(
@@ -48,7 +57,12 @@ public class User
         string? city,
         Sexualities? sexuality,
         SexualOrientations? sexualOrientation,
-        string? password)
+        string? password,
+        double? height,
+        double? weight,
+        double? latitude,
+        double? longitude
+        )
     {
         Id = id;
         Email = email;
@@ -59,6 +73,10 @@ public class User
         Sexuality = sexuality;
         SexualOrientation = sexualOrientation;
         Password = password;
+        Height = height;
+        Weight = weight;
+        Latitude = latitude;
+        Longitude = longitude;
     } 
     
     public static User Create(
@@ -69,7 +87,11 @@ public class User
         string? city,
         Sexualities? sexuality,
         SexualOrientations? sexualOrientation,
-        string? password)
+        string? password,
+        double? height,
+        double? weight,
+        double? latitude,
+        double? longitude)
     {
         if (string.IsNullOrWhiteSpace(email))
             throw new ArgumentException("Email is required.");
@@ -83,7 +105,11 @@ public class User
             city,
             sexuality,
             sexualOrientation,
-            password);
+            password,
+            height, 
+            weight, 
+            latitude, 
+            longitude);
     }
     
     private static string ValidateLocation(string value)

@@ -6,7 +6,7 @@ public static class UserUseCase
 {
     public static User CreateNewUser(string name, string email)
     {
-        return User.Create(email: email, name, null, null, null, null, null, null);
+        return User.Create(email: email, name, null, null, null, null, null, null, null, null, null, null);
     }
 
     public static User CreateWithExistingId(Guid id, string email)
@@ -19,6 +19,11 @@ public static class UserUseCase
             city: null,
             sexuality: null,
             sexualOrientation: null,
-            password: null);
+            password: null,
+            height: null, 
+            weight: null, 
+            latitude: null, 
+            longitude: null
+            );
     }
 }

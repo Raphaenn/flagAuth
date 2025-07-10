@@ -33,7 +33,12 @@ public class UserRepository : IUserRepository
                     city: response.City,
                     sexuality: Enum.TryParse<Sexualities>(response.Sexuality, out var sex) ? sex : null,
                     sexualOrientation: Enum.TryParse<SexualOrientations>(response.SexualOrientation, out var orientation) ? orientation : null,
-                    password: response.Password);
+                    password: response.Password,
+                    height: response.Height,
+                    weight: response.Weight,
+                    latitude: response.Latitude,
+                    longitude: response.Longitude
+                    );
 
 
             }

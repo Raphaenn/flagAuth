@@ -13,4 +13,8 @@ public class UserView
     public string? Sexuality { get; set; }
     public string? SexualOrientation { get; set; }
     public string? Password { get; set; }
+    public double? Height { get; private set; }
+    public double? Weight { get; private set; }
+    public double? Latitude { get; private set; }
+    public double? Longitude { get; private set; }
 }
