@@ -135,7 +135,7 @@ public class User
         return birthdateUtc;
     }
 
-    public void UpdateUser(string newName, DateTime birth, SexualOrientations sexualOrientation, Sexualities sexuality, string country, string city, string password)
+    public void UpdateUser(string newName, DateTime birth, SexualOrientations sexualOrientation, Sexualities sexuality, string country, string city, string password, double? height, double? weight, double? latitude, double? longitude)
     {
         if (string.IsNullOrWhiteSpace(newName))
             throw new ArgumentException("Name is required.");
@@ -147,5 +147,9 @@ public class User
         Sexuality = sexuality;
         SexualOrientation = sexualOrientation;
         Password = password;
+        Height = height;
+        Weight = weight;
+        Latitude = latitude;
+        Longitude = longitude;
     }
 }

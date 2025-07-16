@@ -36,8 +36,6 @@ public static class JwtConfig
                     {
                         // Acessar o header Authorization
                         var authorizationHeader = context.Request.Headers["authorization"].ToString();
-                        Console.WriteLine(authorizationHeader);
-                        Console.WriteLine("aqui");
                         // Verificar se o header contém o prefixo "Bearer " e extrair o token
                         if (!string.IsNullOrEmpty(authorizationHeader) && authorizationHeader.StartsWith("Bearer "))
                         {

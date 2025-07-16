@@ -26,7 +26,6 @@ public class AuthEndpointDef : IEndpointsDefinitions
     {
         app.MapGet("/auth/social-signup", async (HttpContext context, IMediator mediator) =>
         {
-            Console.WriteLine("cai aqui");
             foreach (var us in context.User.Claims)
             {
                 Console.WriteLine(us.Value);
@@ -149,7 +148,6 @@ public class AuthEndpointDef : IEndpointsDefinitions
                 };
 
                 User user = await mediator.Send(getUserQuery);
-
                 
                 // return an specific acc status if user wasn't registered
                 if (user == null)
@@ -168,10 +166,11 @@ public class AuthEndpointDef : IEndpointsDefinitions
                     };
 
                     string createdSession = await mediator.Send(createSession);
+                    
                     return Results.Created("/auth/verify", new VerifyUserResponse(User: user, AccStatus: "incompleteAccount", Token: createdSession));
                 }
                 
-                return Results.Ok(new VerifyUserResponse(User: user, AccStatus: "completeAccount", Token: null));
+                return Results.Ok(new VerifyUserResponse(User: user, AccStatus: "needCompleteAuth", Token: null));
             }
             catch (Exception e)
             {
@@ -266,7 +265,7 @@ public class AuthEndpointDef : IEndpointsDefinitions
                 var request = await context.Request.ReadFromJsonAsync<CompleteUserRequest>();
                 
                 if (string.IsNullOrWhiteSpace(request.Password))
-                    return Results.BadRequest("Senha não pode ser vazia.");
+                    return Results.BadRequest("Password cannot be empty");
 
 
                 if (request is null || request.Id is null)
@@ -281,12 +280,16 @@ public class AuthEndpointDef : IEndpointsDefinitions
                 {
                     Id = request.Id,
                     Name = request.Name,
-                    BrithDate = request.BrithDate,
+                    BirthDate = request.BirthDate,
                     Country = request.Country,
                     City = request.City,
                     Sexuality = request.Sexuality,
                     SexualOrientation = request.SexualOrientation,
-                    Password = passwordHash
+                    Password = passwordHash,
+                    Height = request.Height,
+                    Weight = request.Weight,
+                    Latitude = request.Latitude,
+                    Longitude = request.Longitude
                 };
 
                 User user = await mediator.Send(completeUser);
@@ -295,6 +298,7 @@ public class AuthEndpointDef : IEndpointsDefinitions
             }
             catch (Exception e)
             {
+                Console.WriteLine(e.Message);
                 throw new Exception(e.Message);
             }
         });

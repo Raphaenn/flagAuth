@@ -1,3 +1,4 @@
+using System.Reflection;
 using App.IRepository;
 using App.Users.Commands;
 using Domain.Entities;
@@ -25,12 +26,16 @@ public class UpdateUserCmdHandler : IRequestHandler<UpdateUserCommand, User>
 
         user.UpdateUser(
             newName: updateUserCommand.Name,
-            birth: DateTime.Parse(updateUserCommand.BrithDate), 
+            birth: DateTime.Parse(updateUserCommand.BirthDate), 
             sexualOrientation: updateUserCommand.SexualOrientation,
             sexuality: updateUserCommand.Sexuality,
             country: updateUserCommand.Country,
             city: updateUserCommand.City,
-            password: updateUserCommand.Password
+            password: updateUserCommand.Password,
+            height: updateUserCommand.Height,
+            weight: updateUserCommand.Weight,
+            latitude: updateUserCommand.Latitude,
+            longitude: updateUserCommand.Longitude
             );
 
         await _userRepository.UpdateUser(user);

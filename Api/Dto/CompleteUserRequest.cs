@@ -1,6 +1,6 @@
 using Domain.Entities;
 
-namespace App.Auth.DTOs;
+namespace Api.Dto;
 
 public class CompleteUserRequest
 {

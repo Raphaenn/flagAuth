@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using App.IRepository;
 using Domain.Entities;
 using Infra.Mappers;
@@ -38,9 +39,7 @@ public class UserRepository : IUserRepository
                     weight: response.Weight,
                     latitude: response.Latitude,
                     longitude: response.Longitude
-                    );
-
-
+                );
             }
         }
         return null;
@@ -50,7 +49,6 @@ public class UserRepository : IUserRepository
     {
         try
         {
-            Console.WriteLine("aqui?");
             var request = UserMapper.ToEntity(user);
             await _infraDbContext.users.AddAsync(request);
             await _infraDbContext.SaveChangesAsync();
@@ -58,7 +56,6 @@ public class UserRepository : IUserRepository
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
             throw new Exception(e.Message);
         }
     }
@@ -67,21 +64,27 @@ public class UserRepository : IUserRepository
     {
         try
         {
-            var entity = await _infraDbContext.users.FindAsync(user.Id);
-            entity.Name = user.Name;
-            entity.Birthdate = user.Birthdate;
-            entity.Country = user.Country;
-            entity.City = user.City;
-            entity.Sexuality = user.Sexuality.ToString();
-            entity.SexualOrientation = user.SexualOrientation.ToString();
-            entity.Password = user.Password;
+            var entity = await _infraDbContext.users!.FindAsync(user.Id);
+            if (entity != null)
+            {
+                entity.Name = user.Name;
+                entity.Birthdate = user.Birthdate;
+                entity.Country = user.Country;
+                entity.City = user.City;
+                entity.Sexuality = user.Sexuality.ToString();
+                entity.SexualOrientation = user.SexualOrientation.ToString();
+                entity.Password = user.Password;
+                entity.Height = user.Height;
+                entity.Weight = user.Weight;
+                entity.Latitude = user.Latitude;
+                entity.Longitude = user.Longitude;
+            }
 
             await _infraDbContext.SaveChangesAsync();
             return true;
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.InnerException?.Message);
             throw new Exception($"Erro ao tentar atualizar usuário: {e.Message}");
         }
     }
@@ -91,12 +94,12 @@ public class UserRepository : IUserRepository
         try
         {
             if (!Guid.TryParse(id, out Guid guidId))
-                throw new ArgumentException("ID inválido");
-            
-            UserView response = await _infraDbContext.users_view.FindAsync(guidId);
+                throw new ArgumentException("Invalid id");
+
+            UserView? response = await _infraDbContext.users_view!.FindAsync(guidId);
             if (response == null)
             {
-                return null;
+                throw new Exception("User not found");
             }
 
             User user = UserMapper.ToDomain(response);

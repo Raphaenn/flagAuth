@@ -72,6 +72,10 @@ public class InfraDbContext : DbContext
             entity.Property(uv => uv.Sexuality).HasColumnName("sexuality");
             entity.Property(uv => uv.SexualOrientation).HasColumnName("sexual_orientation");
             entity.Property(uv => uv.Password).HasColumnName("password");
+            entity.Property(uv => uv.Height).HasColumnName("height");
+            entity.Property(uv => uv.Weight).HasColumnName("weight");
+            entity.Property(uv => uv.Latitude).HasColumnName("latitude");
+            entity.Property(uv => uv.Longitude).HasColumnName("longitude");
         });
     }
     
