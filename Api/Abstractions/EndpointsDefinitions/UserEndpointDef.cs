@@ -87,7 +87,7 @@ public class UserEndpointDef : IEndpointsDefinitions
                 if (!Directory.Exists(fileFolder))
                     Directory.CreateDirectory(fileFolder);
 
-                var fileName = $"{userId}{Path.GetExtension(file.FileName)}";
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
                 var fullPath = Path.Combine(fileFolder, fileName);
 
                 // Salva o arquivo
@@ -105,6 +105,15 @@ public class UserEndpointDef : IEndpointsDefinitions
             {
                 return Results.BadRequest(e.Message);
             }
+        }).RequireAuthorization();
+
+        app.MapGet("/user/photos", async (HttpContext context, IMediator mediator) =>
+        {
+            string userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            GetUserPhotosCommand cmd = new GetUserPhotosCommand(userId);
+            var res = await mediator.Send(cmd);
+            
+            return Results.Ok(res);
         }).RequireAuthorization();
     }
 }

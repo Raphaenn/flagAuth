@@ -2,6 +2,7 @@ using App.IRepository;
 using Domain.Entities;
 using Infra.Mappers;
 using Infra.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infra.Repository;
 
@@ -16,16 +17,24 @@ public class UserPhotosRepository : IUserPhotoRepository
     
     public async Task<bool> UploadPhoto(UserPhotos userPhotos)
     {
-        try
+        UserPhotoModel photos = UserPhotoMapper.ToModel(userPhotos);
+        await _infraDbContext.userPhotos.AddAsync(photos);
+        await _infraDbContext.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<List<UserPhotos>> GetUserPhotos(Guid userId)
+    {
+        List<UserPhotoModel> userPhotos = await _infraDbContext.userPhotos
+            .Where(u => u.UserId == userId)
+            .ToListAsync();
+
+        List<UserPhotos> result = new List<UserPhotos>();
+        foreach (var photos in userPhotos)
         {
-            UserPhotoModel photos = UserPhotoMapper.ToModel(userPhotos);
-            await _infraDbContext.userPhotos.AddAsync(photos);
-            await _infraDbContext.SaveChangesAsync();
-            return true;
+            UserPhotos res = UserPhotoMapper.ToDomain(photos);
+            result.Add(res);
         }
-        catch (Exception e)
-        {
-            throw new Exception(e.Message);
-        }
+        return result;
     }
 }
