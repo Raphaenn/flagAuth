@@ -20,6 +20,7 @@
 
     <ItemGroup>
       <Folder Include="Connectors\" />
+      <Folder Include="files\" />
     </ItemGroup>
 
     <ItemGroup>
