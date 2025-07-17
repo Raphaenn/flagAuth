@@ -77,10 +77,29 @@ public class InfraDbContext : DbContext
             entity.Property(uv => uv.Latitude).HasColumnName("latitude");
             entity.Property(uv => uv.Longitude).HasColumnName("longitude");
         });
+        
+        modelBuilder.Entity<UserPhotoModel>(entity =>
+        {
+            entity.ToTable("user_photo");
+            entity.HasKey(uv => uv.Id);
+            entity.Property(uv => uv.Id).HasColumnName("id");
+            entity.Property(uv => uv.UserId).HasColumnName("user_id");
+            entity.Property(uv => uv.Url).HasColumnName("url");
+            entity.Property(uv => uv.Tag).HasColumnName("tag");
+            entity.Property(uv => uv.IsProfilePicture).HasColumnName("is_profile");
+            entity.Property(uv => uv.CreatedAt).HasColumnName("created_at");
+            
+            entity.HasOne(uv => uv.User)
+                .WithMany(u => u.Photos)
+                .HasForeignKey(uv => uv.UserId)
+                .HasConstraintName("fk_userphoto_user") // opcional: nome da constraint no banco
+                .OnDelete(DeleteBehavior.Cascade);
+        });
     }
     
     public DbSet<UserView>? users_view { get; set; }
     public DbSet<UserView>? users { get; set; }
     public DbSet<Login>? login { get; set; }
     public DbSet<FriendsDbModel>? friends { get; set; }
+    public DbSet<UserPhotoModel>? userPhotos { get; set; }
 }

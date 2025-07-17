@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Api.Dto;
 using App.Users.Commands;
 using App.Users.DTOs;
@@ -10,6 +11,8 @@ namespace Api.Abstractions.EndpointsDefinitions;
 
 public class UserEndpointDef : IEndpointsDefinitions
 {
+    private record UpdatePhoneRequest(string Token, string Url1, string Url2, string Url3);
+    
     public void RegisterEndpoints(WebApplication app)
     {
         app.MapPost("/users/create", async (HttpContext context, IMediator mediator) =>
@@ -66,6 +69,42 @@ public class UserEndpointDef : IEndpointsDefinitions
                 throw new Exception(e.Message);
             }
         });
+        
+        app.MapPost("/user/upload-photos", async (HttpContext context, IFormFile file, IMediator mediator) =>
+        {
+            try
+            {
+                var userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
+                if (userId == null)
+                {
+                    return Results.BadRequest("User not found");
+                } 
+                
+                var fileFolder = Path.Combine(Directory.GetCurrentDirectory(), "files");
+                
+                // Create folder if hot exists
+                if (!Directory.Exists(fileFolder))
+                    Directory.CreateDirectory(fileFolder);
+
+                var fileName = $"{userId}{Path.GetExtension(file.FileName)}";
+                var fullPath = Path.Combine(fileFolder, fileName);
+
+                // Salva o arquivo
+                using (var stream = new FileStream(fullPath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                UploadUserPhotosCommand upload = new UploadUserPhotosCommand(userId, fullPath);
+                UserPhotos photo = await mediator.Send(upload);
+
+                return Results.Ok(new { FilePath = $"/files/{fileName}", data = photo });
+            }
+            catch (Exception e)
+            {
+                return Results.BadRequest(e.Message);
+            }
+        }).RequireAuthorization();
     }
 }
