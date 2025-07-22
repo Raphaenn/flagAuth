@@ -17,7 +17,7 @@ public class UploadUserPhotoCmdHandler : IRequestHandler<UploadUserPhotosCommand
     public async Task<UserPhotos> Handle(UploadUserPhotosCommand request, CancellationToken cancellationToken)
     {
         Guid parsedUserId = Guid.Parse(request.UserId);
-        var userPhoto = UserPhotos.UploadPhoto(parsedUserId, request.Url, false);
+        var userPhoto = UserPhotos.UploadPhoto(parsedUserId, request.Url, request.IsProfile);
         await _userPhotoRepository.UploadPhoto(userPhoto);
         return userPhoto;
     }

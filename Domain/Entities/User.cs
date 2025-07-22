@@ -13,6 +13,14 @@ public enum Sexualities
     Male = 1,
 }
 
+public enum UserStatus
+{
+    Active,
+    Inactive,
+    SemiCompleted,
+    Incomplete,
+}
+
 public class User
 {
     public Guid Id { get; private set; }
@@ -28,6 +36,7 @@ public class User
     public double? Weight { get; private set; }
     public double? Latitude { get; private set; }
     public double? Longitude { get; private set; }
+    public UserStatus Status { get; private set; }
 
     public static User Rehydrate(
         Guid id,
@@ -151,5 +160,27 @@ public class User
         Weight = weight;
         Latitude = latitude;
         Longitude = longitude;
+    }
+
+    public void Activate()
+    {
+        if (Status == UserStatus.SemiCompleted)
+            throw new InvalidOperationException("Incomplete user cannot be updated");
+
+        Status = UserStatus.Active;
+    }
+
+    public void Deactivate()
+    {
+        Status = UserStatus.Inactive;
+    }
+
+    public void SemiComplete()
+    {
+        if (Status == UserStatus.Incomplete)
+            throw new InvalidOperationException("Incomplete user cannot be updated");
+
+        Status = UserStatus.SemiCompleted;
+
     }
 }

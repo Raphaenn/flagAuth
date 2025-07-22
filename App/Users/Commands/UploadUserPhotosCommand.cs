@@ -3,4 +3,4 @@ using MediatR;
 
 namespace App.Users.Commands;
 
-public record struct UploadUserPhotosCommand(string UserId, string Url) : IRequest<UserPhotos>;
+public record struct UploadUserPhotosCommand(string UserId, string Url, bool IsProfile) : IRequest<UserPhotos>;
