@@ -14,6 +14,8 @@ public class UserEndpointDef : IEndpointsDefinitions
     private record UpdatePhoneRequest(string Token, string Url1, string Url2, string Url3);
 
     public record UploadImage(bool IsPublic);
+    
+    private record struct ChangeStatus(string Status);
 
     private record struct GetUserRequest(string Id);
     
@@ -93,6 +95,31 @@ public class UserEndpointDef : IEndpointsDefinitions
                 throw new Exception(e.Message);
             }
         });
+
+        app.MapPost("/user/change-status", async (HttpContext context, IMediator mediator) =>
+        {
+            try
+            {
+                string? userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var request = await context.Request.ReadFromJsonAsync<ChangeStatus>();
+
+                if (userId == null)
+                {
+                    throw new Exception("Invalid user");
+                }
+
+                Guid parsedUserId = Guid.Parse(userId);
+                UserStatus status = Enum.Parse<UserStatus>(request.Status, ignoreCase: true);
+
+                ChangeUserStatusCommand cmd = new ChangeUserStatusCommand(parsedUserId, status);
+                User res = await mediator.Send(cmd);
+                return Results.Ok(res);
+            }
+            catch (Exception e)
+            {
+                return Results.BadRequest(e.Message);
+            }
+        }).RequireAuthorization();
         
         app.MapPost("/user/upload-photos", async (HttpContext context, IFormFile file, IMediator mediator) =>
         {

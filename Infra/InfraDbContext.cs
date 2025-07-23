@@ -30,6 +30,7 @@ public class InfraDbContext : DbContext
             entity.Property(uv => uv.Weight).HasColumnName("weight");
             entity.Property(uv => uv.Latitude).HasColumnName("latitude");
             entity.Property(uv => uv.Longitude).HasColumnName("longitude");
+            entity.Property(uv => uv.Status).HasColumnName("status");
         });
 
         modelBuilder.Entity<Login>(entity =>
@@ -76,6 +77,7 @@ public class InfraDbContext : DbContext
             entity.Property(uv => uv.Weight).HasColumnName("weight");
             entity.Property(uv => uv.Latitude).HasColumnName("latitude");
             entity.Property(uv => uv.Longitude).HasColumnName("longitude");
+            entity.Property(uv => uv.Status).HasColumnName("status");
         });
         
         modelBuilder.Entity<UserPhotoModel>(entity =>

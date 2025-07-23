@@ -17,13 +17,15 @@ public static class UserMapper
             City = domain.City,
             Sexuality = domain.Sexuality.ToString(),
             SexualOrientation = domain.SexualOrientation.ToString(),
-            Password = domain.Password
+            Password = domain.Password,
+            Status = domain.Status
         };
     }
 
     public static User ToDomain(UserView entity)
     {
-        var user = User.Rehydrate(id: entity.Id,
+        var user = User.Rehydrate(
+            id: entity.Id,
             email: entity.Email,
             name: entity.Name,
             birthdate: entity.Birthdate,
@@ -35,7 +37,8 @@ public static class UserMapper
             height: entity.Height,
             weight: entity.Weight,
             latitude: entity.Latitude,
-            longitude: entity.Longitude
+            longitude: entity.Longitude,
+            status: entity.Status
             );
 
         // Access private setters via reflection or use internal constructor if available
