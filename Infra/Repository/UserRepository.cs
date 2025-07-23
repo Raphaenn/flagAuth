@@ -21,8 +21,8 @@ public class UserRepository : IUserRepository
         if (_infraDbContext.users_view != null)
         {
             UserView? response = await _infraDbContext.users_view
-                .Where(u => u.Email == email)
-                .FirstOrDefaultAsync();
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Email == email);
 
             if (response != null)
             {
@@ -38,7 +38,8 @@ public class UserRepository : IUserRepository
                     height: response.Height,
                     weight: response.Weight,
                     latitude: response.Latitude,
-                    longitude: response.Longitude
+                    longitude: response.Longitude,
+                    status: response.Status
                 );
             }
         }
@@ -96,7 +97,8 @@ public class UserRepository : IUserRepository
             if (!Guid.TryParse(id, out Guid guidId))
                 throw new ArgumentException("Invalid id");
 
-            UserView? response = await _infraDbContext.users_view!.FindAsync(guidId);
+            UserView? response = await _infraDbContext.users_view!
+                .AsNoTracking().FirstOrDefaultAsync(u => u.Id == guidId);
             if (response == null)
             {
                 throw new Exception("User not found");
@@ -111,5 +113,17 @@ public class UserRepository : IUserRepository
         {
             throw new Exception(e.Message);
         }
+    }
+
+    public async Task ChangeUserStatus(User user)
+    {
+        if (_infraDbContext.users != null)
+        {
+            UserView parsedUser = UserMapper.ToEntity(user);
+            _infraDbContext.users.Update(parsedUser);
+            await _infraDbContext.SaveChangesAsync();
+            return;
+        }
+        return;
     }
 }

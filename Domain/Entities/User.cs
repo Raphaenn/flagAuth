@@ -13,6 +13,14 @@ public enum Sexualities
     Male = 1,
 }
 
+public enum UserStatus
+{
+    Inactive = 0,
+    Incomplete = 1,
+    SemiComplete = 2,
+    Active = 3,
+}
+
 public class User
 {
     public Guid Id { get; private set; }
@@ -28,6 +36,7 @@ public class User
     public double? Weight { get; private set; }
     public double? Latitude { get; private set; }
     public double? Longitude { get; private set; }
+    public UserStatus? Status { get; private set; }
 
     public static User Rehydrate(
         Guid id,
@@ -42,10 +51,11 @@ public class User
         double? height,
         double? weight,
         double? latitude,
-        double? longitude
+        double? longitude,
+        UserStatus? status
         )
     {
-        return new User(id, email, name, birthdate, country, city, sexuality, sexualOrientation, password, height, weight, latitude, longitude);
+        return new User(id, email, name, birthdate, country, city, sexuality, sexualOrientation, password, height, weight, latitude, longitude, status);
     }
 
     private User(
@@ -61,7 +71,8 @@ public class User
         double? height,
         double? weight,
         double? latitude,
-        double? longitude
+        double? longitude,
+        UserStatus? status
         )
     {
         Id = id;
@@ -77,6 +88,7 @@ public class User
         Weight = weight;
         Latitude = latitude;
         Longitude = longitude;
+        Status = status;
     } 
     
     public static User Create(
@@ -91,7 +103,9 @@ public class User
         double? height,
         double? weight,
         double? latitude,
-        double? longitude)
+        double? longitude,
+        UserStatus? status
+        )
     {
         if (string.IsNullOrWhiteSpace(email))
             throw new ArgumentException("Email is required.");
@@ -109,7 +123,8 @@ public class User
             height, 
             weight, 
             latitude, 
-            longitude);
+            longitude,
+            status);
     }
     
     private static string ValidateLocation(string value)
@@ -151,5 +166,26 @@ public class User
         Weight = weight;
         Latitude = latitude;
         Longitude = longitude;
+    }
+
+    public void ChangeStatus(UserStatus newStatus)
+    {
+        if (Status == newStatus)
+            throw new ArgumentException("Invalid status change");
+
+        if (Status == UserStatus.Incomplete && newStatus == UserStatus.SemiComplete)
+        {
+            Status = newStatus;
+        }
+
+        if (Status == UserStatus.SemiComplete && newStatus == UserStatus.Active)
+        {
+            Status = newStatus;
+        }
+        
+        if (Status == UserStatus.Active && newStatus == UserStatus.Inactive)
+        {
+            Status = newStatus;
+        }
     }
 }

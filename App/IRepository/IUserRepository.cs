@@ -11,4 +11,6 @@ public interface IUserRepository
     Task<Guid> CreateUser(User user);
 
     Task<Boolean> UpdateUser(User user);
+
+    Task ChangeUserStatus(User user);
 }

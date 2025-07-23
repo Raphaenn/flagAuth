@@ -12,6 +12,12 @@ namespace Api.Abstractions.EndpointsDefinitions;
 public class UserEndpointDef : IEndpointsDefinitions
 {
     private record UpdatePhoneRequest(string Token, string Url1, string Url2, string Url3);
+
+    public record UploadImage(bool IsPublic);
+    
+    private record struct ChangeStatus(string Status);
+
+    private record struct GetUserRequest(string Id);
     
     public void RegisterEndpoints(WebApplication app)
     {
@@ -23,12 +29,32 @@ public class UserEndpointDef : IEndpointsDefinitions
             return Results.Ok(response);
         }).AllowAnonymous();
 
-        app.MapGet("/users/refresh/info", async (HttpContext context, IMediator mediator) =>
+        app.MapGet("/user/info/{id}", async (string id, HttpContext context, IMediator mediator) =>
         {
-            var request = await context.Request.ReadFromJsonAsync<CreateUserRequest>();
-            GetUserByIdQuery userQuery = new GetUserByIdQuery(request.Id);
-            User response = await mediator.Send(userQuery);
-            return response;
+            GetUserByIdQuery userQuery = new GetUserByIdQuery(id);
+            GetUserPhotosCommand cmd = new GetUserPhotosCommand(id);
+            
+            User user = await mediator.Send(userQuery);
+            List<UserPhotos> photos = await mediator.Send(cmd);
+
+            GetUserResponse parsedRes = new GetUserResponse
+            {
+                Id = user.Id.ToString(),
+                Email = user.Email,
+                Name = user.Name,
+                Birthdate = user.Birthdate,
+                Country = user.Country,
+                City = user.City,
+                Sexuality = user.Sexuality.ToString(),
+                SexualOrientation = user.SexualOrientation.ToString(),
+                Height = user.Height,
+                Weight = user.Weight,
+                Latitude = user.Latitude,
+                Longitude = user.Longitude,
+                Status = user.Status.ToString(),
+                Pics = photos
+            };
+            return Results.Ok(parsedRes);
         });
 
         app.MapPut("/user/update", async (HttpContext context, IMediator mediator) =>
@@ -69,6 +95,31 @@ public class UserEndpointDef : IEndpointsDefinitions
                 throw new Exception(e.Message);
             }
         });
+
+        app.MapPost("/user/change-status", async (HttpContext context, IMediator mediator) =>
+        {
+            try
+            {
+                string? userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var request = await context.Request.ReadFromJsonAsync<ChangeStatus>();
+
+                if (userId == null)
+                {
+                    throw new Exception("Invalid user");
+                }
+
+                Guid parsedUserId = Guid.Parse(userId);
+                UserStatus status = Enum.Parse<UserStatus>(request.Status, ignoreCase: true);
+
+                ChangeUserStatusCommand cmd = new ChangeUserStatusCommand(parsedUserId, status);
+                User res = await mediator.Send(cmd);
+                return Results.Ok(res);
+            }
+            catch (Exception e)
+            {
+                return Results.BadRequest(e.Message);
+            }
+        }).RequireAuthorization();
         
         app.MapPost("/user/upload-photos", async (HttpContext context, IFormFile file, IMediator mediator) =>
         {
@@ -81,6 +132,10 @@ public class UserEndpointDef : IEndpointsDefinitions
                     return Results.BadRequest("User not found");
                 } 
                 
+                var formData = context.Request.Form;
+                var profile = formData["isProfile"].ToString();
+                bool parsedIsProfile = bool.Parse(profile);
+                
                 var fileFolder = Path.Combine(Directory.GetCurrentDirectory(), "files");
                 
                 // Create folder if hot exists
@@ -90,13 +145,13 @@ public class UserEndpointDef : IEndpointsDefinitions
                 var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
                 var fullPath = Path.Combine(fileFolder, fileName);
 
-                // Salva o arquivo
+                // save file
                 using (var stream = new FileStream(fullPath, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);
                 }
 
-                UploadUserPhotosCommand upload = new UploadUserPhotosCommand(userId, fullPath);
+                UploadUserPhotosCommand upload = new UploadUserPhotosCommand(userId, fullPath, parsedIsProfile);
                 UserPhotos photo = await mediator.Send(upload);
 
                 return Results.Ok(new { FilePath = $"/files/{fileName}", data = photo });
@@ -115,5 +170,10 @@ public class UserEndpointDef : IEndpointsDefinitions
             
             return Results.Ok(res);
         }).RequireAuthorization();
+
+        // app.MapDelete("user/photo/:id", async (HttpContext ContextCallback, IMediator mediator) =>
+        // {
+        //     string 
+        // }).RequireAuthorization();
     }
 }

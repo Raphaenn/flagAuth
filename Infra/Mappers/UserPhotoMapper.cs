@@ -17,6 +17,7 @@ public static class UserPhotoMapper
             Id = userPhotos.Id,
             UserId = userPhotos.UserId,
             Url = userPhotos.Url,
+            IsProfilePicture = userPhotos.IsProfilePicture,
             CreatedAt = userPhotos.UploadedAt
         };
 
