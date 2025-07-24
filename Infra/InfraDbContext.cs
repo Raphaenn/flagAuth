@@ -97,6 +97,24 @@ public class InfraDbContext : DbContext
                 .HasConstraintName("fk_userphoto_user") // opcional: nome da constraint no banco
                 .OnDelete(DeleteBehavior.Cascade);
         });
+        
+        modelBuilder.Entity<PreferencesModel>(entity =>
+        {
+            entity.ToTable("user_preferences");
+            entity.HasKey(uv => uv.Id);
+            entity.Property(uv => uv.Id).HasColumnName("id");
+            entity.Property(uv => uv.UserId).HasColumnName("user_id");
+            entity.Property(uv => uv.Location).HasColumnName("location");
+            entity.Property(uv => uv.DistanceKm).HasColumnName("distance_km");
+            entity.Property(uv => uv.GenderPreference).HasColumnName("gender_preference");
+            entity.Property(uv => uv.MinAge).HasColumnName("age_min");
+            entity.Property(uv => uv.MaxAge).HasColumnName("age_max");
+            entity.Property(uv => uv.MinHeight).HasColumnName("height_min");
+            entity.Property(uv => uv.MaxHeight).HasColumnName("height_max");
+            entity.Property(uv => uv.MinWeight).HasColumnName("weight_min");
+            entity.Property(uv => uv.MaxWeight).HasColumnName("weight_max");
+            entity.Property(uv => uv.Interests).HasColumnName("interests");
+        });
     }
     
     public DbSet<UserView>? users_view { get; set; }
@@ -104,4 +122,5 @@ public class InfraDbContext : DbContext
     public DbSet<Login>? login { get; set; }
     public DbSet<FriendsDbModel>? friends { get; set; }
     public DbSet<UserPhotoModel>? userPhotos { get; set; }
+    public DbSet<PreferencesModel>? preferences { get; set; }
 }
