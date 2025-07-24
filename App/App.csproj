@@ -17,6 +17,8 @@
 
     <ItemGroup>
       <Folder Include="Friendship\" />
+      <Folder Include="Preference\Queries\" />
+      <Folder Include="Preference\QueryHandlers\" />
     </ItemGroup>
 
     <ItemGroup>

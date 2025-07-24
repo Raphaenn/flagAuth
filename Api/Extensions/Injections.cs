@@ -15,6 +15,7 @@ public static class Injections
         serviceCollection.AddScoped<IAuthRepository, AuthRepository>();
         serviceCollection.AddScoped<IFriendRepository, FriendRepository>();
         serviceCollection.AddScoped<IUserPhotoRepository, UserPhotosRepository>();
+        serviceCollection.AddScoped<IPreferencesRepository, PreferencesRepository>();
         
         serviceCollection.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetUserQuery).Assembly));
 
