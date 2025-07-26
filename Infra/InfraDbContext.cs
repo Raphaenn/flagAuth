@@ -1,3 +1,4 @@
+using Domain.Entities;
 using Infra.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -115,6 +116,17 @@ public class InfraDbContext : DbContext
             entity.Property(uv => uv.MaxWeight).HasColumnName("weight_max");
             entity.Property(uv => uv.Interests).HasColumnName("interests");
         });
+        
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.ToTable("refresh_tokens");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Token).HasColumnName("token");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.ExpiresAt).HasColumnName("expires_at");
+            entity.Property(e => e.Revoked).HasColumnName("is_revoked");
+        });
     }
     
     public DbSet<UserView>? users_view { get; set; }
@@ -123,4 +135,5 @@ public class InfraDbContext : DbContext
     public DbSet<FriendsDbModel>? friends { get; set; }
     public DbSet<UserPhotoModel>? userPhotos { get; set; }
     public DbSet<PreferencesModel>? preferences { get; set; }
+    public DbSet<RefreshToken>? refreshTokens { get; set; }
 }
