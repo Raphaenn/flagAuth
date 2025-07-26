@@ -31,7 +31,7 @@ public class Preferences
         DistanceKm = distanceKm;
         GenderPreference = genderPreference;
         MinAge = minAge;
-        MinAge = maxAge;
+        MaxAge = maxAge;
         MinHeight = minHeight;
         MaxHeight = maxHeight;
         MinWeight = minWeight;

@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using Api.Dto;
 using App.Users.Queries;
 using MediatR;
 using Api.Extensions;
@@ -7,6 +8,7 @@ using App.Auth.DTOs;
 using App.Users.Commands;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
+using CompleteUserRequest = App.Auth.DTOs.CompleteUserRequest;
 
 namespace Api.Abstractions.EndpointsDefinitions;
 
@@ -203,6 +205,17 @@ public class AuthEndpointDef : IEndpointsDefinitions
                 };
                 
                 string createdToken = await mediator.Send(createToken);
+
+                if (createdToken == null)
+                {
+                    return Results.BadRequest("Create token error");
+                }
+                
+                string refreshToken = Guid.NewGuid().ToString();
+                DateTime expires = DateTime.UtcNow.AddDays(7);
+
+                // Salva o refresh token no banco, junto com data de expiração e o userId
+                await mediator.Send(new SaveRefreshTokenCommand(user.Id, refreshToken, expires));
             
                 Result res = new Result(user, createdToken);
                 
@@ -248,9 +261,22 @@ public class AuthEndpointDef : IEndpointsDefinitions
                 
                 string createdToken = await mediator.Send(createToken);
             
-                Result res = new Result(user, createdToken);
+                string refreshToken = Guid.NewGuid().ToString();
+                DateTime expires = DateTime.UtcNow.AddDays(7);
+
+                // Salva o refresh token no banco, junto com data de expiração e o userId
+                await mediator.Send(new SaveRefreshTokenCommand(user.Id, refreshToken, expires));
                 
-                return Results.Ok(res);
+                var data = new
+                {
+                    AccessToken = createdToken,
+                    RefreshToken = refreshToken,
+                    ExpiresAt = expires,
+                    User = user
+                };
+            
+                return Results.Ok(data);
+                
             }
             catch (Exception e)
             {
@@ -317,6 +343,22 @@ public class AuthEndpointDef : IEndpointsDefinitions
             catch (Exception e)
             {
                 return Results.BadRequest(e.Message);
+            }
+        });
+        
+        app.MapPost("/auth/refresh", async (
+            RefreshTokenRequest req,
+            IMediator mediator
+            ) =>
+        {
+            try
+            {
+                var result = await mediator.Send(new RefreshTokenCommand(req.RefreshToken));
+                return Results.Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return Results.BadRequest(new { error = ex.Message });
             }
         });
     }

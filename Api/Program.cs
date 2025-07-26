@@ -3,8 +3,6 @@ using Api.Middlewares;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 
-string secretKey = "esta-e-uma-chave-secreta-de-32-bits";
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddJwtAuthenticationAlternative();
