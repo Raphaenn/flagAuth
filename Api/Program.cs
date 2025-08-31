@@ -18,10 +18,10 @@ builder.Services.AddOpenApiDocument(config =>
 
     config.AddSecurity("JWT", new OpenApiSecurityScheme()
     {
-        Type = OpenApiSecuritySchemeType.ApiKey,
-        Name = "Authorization",
-        In = OpenApiSecurityApiKeyLocation.Header,
-        Description = "Insira o token JWT no formato: Bearer {seu-token-jwt}"
+        Type = OpenApiSecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Description = "Insira: Bearer {seu-token-jwt}"
     });
     
     // Configuração para exigir o token JWT em rotas protegidas
@@ -58,6 +58,12 @@ if (app.Environment.IsDevelopment())
 // app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// app.UseCors(policy => policy
+//     .AllowAnyHeader()
+//     .AllowAnyMethod()
+//     .WithOrigins("https://seu-front.app"));
+
 app.RegisterEndpointsDefinitions();
 
 app.Run();
