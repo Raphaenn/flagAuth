@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using Api.Dto;
 using App.Users.Queries;
 using MediatR;
 using Api.Extensions;
@@ -7,6 +8,7 @@ using App.Auth.DTOs;
 using App.Users.Commands;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
+using CompleteUserRequest = App.Auth.DTOs.CompleteUserRequest;
 
 namespace Api.Abstractions.EndpointsDefinitions;
 
@@ -24,6 +26,8 @@ public class AuthEndpointDef : IEndpointsDefinitions
     
     public void RegisterEndpoints(WebApplication app)
     {
+        app.MapGet("/auth/health-check", () => Results.Ok(true));
+        
         app.MapGet("/auth/social-signup", async (HttpContext context, IMediator mediator) =>
         {
             foreach (var us in context.User.Claims)
@@ -103,15 +107,21 @@ public class AuthEndpointDef : IEndpointsDefinitions
             
                 // create new user
                 CreateUserCommand userCmd = new CreateUserCommand(request.Email);
-                User response = await mediator.Send(userCmd);
+                User user = await mediator.Send(userCmd);
             
                 // Create a session token
                 CreateAuthCommand createToken = new CreateAuthCommand
                 {
-                    Id = response.Id,
+                    Id = user.Id,
                     Email = request.Email,
                 };
                 string createdToken = await mediator.Send(createToken);
+                
+                string refreshToken = Guid.NewGuid().ToString();
+                DateTime expires = DateTime.UtcNow.AddDays(7);
+
+                // Salva o refresh token no banco, junto com data de expiração e o userId
+                await mediator.Send(new SaveRefreshTokenCommand(user.Id, refreshToken, expires));
                 
                 // Anonymous object 
                 // var user = new
@@ -122,14 +132,22 @@ public class AuthEndpointDef : IEndpointsDefinitions
                 // };
                 //
                 // return Results.Created($"/users/{user.id}", new { user });
+                
+                var data = new
+                {
+                    Token = createdToken,
+                    RefreshToken = refreshToken,
+                    ExpiresAt = expires,
+                    User = user
+                };
             
-                return Results.Created("/auth/signup", new Result(User: response, Token: createdToken));
+                return Results.Ok(data);
             }
             catch (Exception e)
             {
                 return Results.BadRequest(e.Message);
             }
-        });
+        }).AllowAnonymous();
 
         app.MapPost("/auth/verify", async (HttpContext context, IMediator mediator) =>
         {
@@ -176,7 +194,7 @@ public class AuthEndpointDef : IEndpointsDefinitions
             {
                 return Results.BadRequest(e.Message);
             }
-        });
+        }).AllowAnonymous();
         
         app.MapPost("/auth/signin/email", async (HttpContext context, IMediator mediator) =>
         {
@@ -203,6 +221,17 @@ public class AuthEndpointDef : IEndpointsDefinitions
                 };
                 
                 string createdToken = await mediator.Send(createToken);
+
+                if (createdToken == null)
+                {
+                    return Results.BadRequest("Create token error");
+                }
+                
+                string refreshToken = Guid.NewGuid().ToString();
+                DateTime expires = DateTime.UtcNow.AddDays(7);
+
+                // Salva o refresh token no banco, junto com data de expiração e o userId
+                await mediator.Send(new SaveRefreshTokenCommand(user.Id, refreshToken, expires));
             
                 Result res = new Result(user, createdToken);
                 
@@ -213,7 +242,7 @@ public class AuthEndpointDef : IEndpointsDefinitions
                 return Results.BadRequest(e.Message);
             }
         });
-        
+    
         app.MapPost("/auth/signin/email-password", async (HttpContext context, IMediator mediator) =>
         {
             try
@@ -248,15 +277,28 @@ public class AuthEndpointDef : IEndpointsDefinitions
                 
                 string createdToken = await mediator.Send(createToken);
             
-                Result res = new Result(user, createdToken);
+                string refreshToken = Guid.NewGuid().ToString();
+                DateTime expires = DateTime.UtcNow.AddDays(7);
+
+                // Salva o refresh token no banco, junto com data de expiração e o userId
+                await mediator.Send(new SaveRefreshTokenCommand(user.Id, refreshToken, expires));
                 
-                return Results.Ok(res);
+                var data = new
+                {
+                    Token = createdToken,
+                    RefreshToken = refreshToken,
+                    ExpiresAt = expires,
+                    User = user
+                };
+            
+                return Results.Ok(data);
+                
             }
             catch (Exception e)
             {
                 return Results.BadRequest(e.Message);
             }
-        });
+        }).AllowAnonymous();
 
         app.MapPost("/auth/complete", async (HttpContext context, IMediator mediator) =>
         {
@@ -298,7 +340,6 @@ public class AuthEndpointDef : IEndpointsDefinitions
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
                 throw new Exception(e.Message);
             }
         });
@@ -317,6 +358,19 @@ public class AuthEndpointDef : IEndpointsDefinitions
             catch (Exception e)
             {
                 return Results.BadRequest(e.Message);
+            }
+        });
+        
+        app.MapPost("/auth/refresh", async (RefreshTokenRequest req, IMediator mediator) =>
+        {
+            try
+            {
+                var result = await mediator.Send(new RefreshTokenCommand(req.RefreshToken));
+                return Results.Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return Results.BadRequest(new { error = ex.Message });
             }
         });
     }

@@ -19,6 +19,8 @@ public static class TokenGenerator
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim("role", "regular"),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim("scope", "friends:read"),
             // new Claim(ClaimTypes.Name, user.Name) // Claim customizada
         };
 

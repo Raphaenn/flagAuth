@@ -3,8 +3,6 @@ using Api.Middlewares;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 
-string secretKey = "esta-e-uma-chave-secreta-de-32-bits";
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddJwtAuthenticationAlternative();
@@ -20,10 +18,10 @@ builder.Services.AddOpenApiDocument(config =>
 
     config.AddSecurity("JWT", new OpenApiSecurityScheme()
     {
-        Type = OpenApiSecuritySchemeType.ApiKey,
-        Name = "Authorization",
-        In = OpenApiSecurityApiKeyLocation.Header,
-        Description = "Insira o token JWT no formato: Bearer {seu-token-jwt}"
+        Type = OpenApiSecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Description = "Insira: Bearer {seu-token-jwt}"
     });
     
     // Configuração para exigir o token JWT em rotas protegidas
@@ -60,6 +58,12 @@ if (app.Environment.IsDevelopment())
 // app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// app.UseCors(policy => policy
+//     .AllowAnyHeader()
+//     .AllowAnyMethod()
+//     .WithOrigins("https://seu-front.app"));
+
 app.RegisterEndpointsDefinitions();
 
 app.Run();
