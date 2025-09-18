@@ -1,16 +1,18 @@
+using App.Dto;
 using Domain.Entities;
 using Infra.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infra;
 
-public class InfraDbContext : DbContext
+public class InfraDbContext : DbContext, IUnitOfWork
 {
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Username=admin;Password=1234;Database=flags;");
+    // Recebe as opções criadas no Program.cs e entrega para o DbContext base
+    public InfraDbContext(DbContextOptions<InfraDbContext> options)
+        : base(options)   // <— chama o construtor da classe base com as opções
+    {                    // corpo do seu construtor (aqui não precisa fazer nada)
     }
-    
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<UserView>(entity =>
@@ -19,7 +21,6 @@ public class InfraDbContext : DbContext
             entity.HasKey(uv => uv.Id);
             entity.Property(uv => uv.Id).HasColumnName("id");
             entity.Property(uv => uv.Name).HasColumnName("name");
-            entity.Property(uv => uv.Email).HasColumnName("email");
             entity.Property(uv => uv.Email).HasColumnName("email");
             entity.Property(uv => uv.Country).HasColumnName("country");
             entity.Property(uv => uv.City).HasColumnName("city");
@@ -61,7 +62,7 @@ public class InfraDbContext : DbContext
             entity.Property(uv => uv.CreatedAt).HasColumnName("created_at");
         });
         
-        modelBuilder.Entity<UserView>(entity =>
+        modelBuilder.Entity<UserDbModel>(entity =>
         {
             entity.ToTable("users");
             entity.HasKey(uv => uv.Id);
@@ -127,13 +128,42 @@ public class InfraDbContext : DbContext
             entity.Property(e => e.ExpiresAt).HasColumnName("expires_at");
             entity.Property(e => e.Revoked).HasColumnName("is_revoked");
         });
+
+        modelBuilder.Entity<OutboxMessage>(entity =>
+        {
+            entity.ToTable("outbox_messages");
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.Id).HasColumnName("id");
+            entity.Property(x => x.Type).HasColumnName("type").IsRequired();
+            entity.Property(x => x.Payload).HasColumnName("payload").HasColumnType("jsonb"); // 👈
+            entity.Property(x => x.OccurredOn).HasColumnName("occurred_on");
+            entity.Property(x => x.ProcessedOn).HasColumnName("processed_on");
+            entity.Property(x => x.Attempts).HasColumnName("attempts");
+            entity.Property(x => x.NextAttemptAt).HasColumnName("next_attempt_at");
+            entity.Property(x => x.Error).HasColumnName("error");
+        });
+
+
+        modelBuilder.Entity<ProcessedMessage>(entity =>
+        {
+            entity.ToTable("processed_messages");
+            entity.HasKey(x => x.EventId);
+            entity.HasKey(x => x.EventId);
+            entity.Property(x => x.EventId).HasColumnName("event_id");
+            entity.Property(x => x.ProcessedAt).HasColumnName("processed_at");
+        });
     }
     
-    public DbSet<UserView>? users_view { get; set; }
-    public DbSet<UserView>? users { get; set; }
-    public DbSet<Login>? login { get; set; }
-    public DbSet<FriendsDbModel>? friends { get; set; }
-    public DbSet<UserPhotoModel>? userPhotos { get; set; }
-    public DbSet<PreferencesModel>? preferences { get; set; }
-    public DbSet<RefreshToken>? refreshTokens { get; set; }
+    public DbSet<UserView>? UsersView { get; set; }
+    public DbSet<UserDbModel>? UserWriteModel { get; set; }
+    public DbSet<Login>? Login { get; set; }
+    public DbSet<FriendsDbModel>? Friends { get; set; }
+    public DbSet<UserPhotoModel>? UserPhotos { get; set; }
+    public DbSet<PreferencesModel>? Preferences { get; set; }
+    public DbSet<RefreshToken>? RefreshTokens { get; set; }
+    
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+    public DbSet<ProcessedMessage> ProcessedMessages => Set<ProcessedMessage>();
+
 }

@@ -9,5 +9,5 @@ public class UserPhotoModel
     public DateTime CreatedAt { get; set; }
     public string? Tag { get; set; }
     
-    public UserView User { get; set; } = null!;
+    public UserDbModel User { get; set; } = null!;
 }

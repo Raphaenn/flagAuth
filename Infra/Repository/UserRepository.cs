@@ -18,9 +18,9 @@ public class UserRepository : IUserRepository
 
     public async Task<User?> GetUser(string email)
     {
-        if (_infraDbContext.users_view != null)
+        if (_infraDbContext.UsersView != null)
         {
-            UserView? response = await _infraDbContext.users_view
+            UserView? response = await _infraDbContext.UsersView
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Email == email);
 
@@ -48,24 +48,16 @@ public class UserRepository : IUserRepository
 
     public async Task<Guid> CreateUser(User user)
     {
-        try
-        {
-            var request = UserMapper.ToEntity(user);
-            await _infraDbContext.users.AddAsync(request);
-            await _infraDbContext.SaveChangesAsync();
-            return user.Id;
-        }
-        catch (Exception e)
-        {
-            throw new Exception(e.Message);
-        }
+        var request = UserMapper.ToEntity(user);
+        await _infraDbContext.UserWriteModel.AddAsync(request);
+        return request.Id;
     }
 
     public async Task<Boolean> UpdateUser(User user)
     {
         try
         {
-            var entity = await _infraDbContext.users!.FindAsync(user.Id);
+            var entity = await _infraDbContext.UserWriteModel!.FindAsync(user.Id);
             if (entity != null)
             {
                 entity.Name = user.Name;
@@ -97,7 +89,7 @@ public class UserRepository : IUserRepository
             if (!Guid.TryParse(id, out Guid guidId))
                 throw new ArgumentException("Invalid id");
 
-            UserView? response = await _infraDbContext.users_view!
+            UserView? response = await _infraDbContext.UsersView!
                 .AsNoTracking().FirstOrDefaultAsync(u => u.Id == guidId);
             if (response == null)
             {
@@ -117,10 +109,10 @@ public class UserRepository : IUserRepository
 
     public async Task ChangeUserStatus(User user)
     {
-        if (_infraDbContext.users != null)
+        if (_infraDbContext.UserWriteModel != null)
         {
-            UserView parsedUser = UserMapper.ToEntity(user);
-            _infraDbContext.users.Update(parsedUser);
+            UserDbModel parsedUser = UserMapper.ToEntity(user);
+            _infraDbContext.UserWriteModel.Update(parsedUser);
             await _infraDbContext.SaveChangesAsync();
             return;
         }

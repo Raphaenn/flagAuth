@@ -15,13 +15,13 @@ public class RefreshTokenRepository : IRefreshTokenRepository
 
     public async Task SaveAsync(RefreshToken token)
     {
-        await _infraDbContext.refreshTokens.AddAsync(token);
+        await _infraDbContext.RefreshTokens.AddAsync(token);
         await _infraDbContext.SaveChangesAsync();
     }
 
     public async Task<RefreshToken?> GetByTokenAsync(string token)
     {
-        return await _infraDbContext.refreshTokens
+        return await _infraDbContext.RefreshTokens
             .FirstOrDefaultAsync(r => r.Token == token && !r.Revoked && r.ExpiresAt > DateTime.UtcNow);
     }
 

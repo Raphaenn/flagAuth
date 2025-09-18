@@ -18,14 +18,14 @@ public class UserPhotosRepository : IUserPhotoRepository
     public async Task<bool> UploadPhoto(UserPhotos userPhotos)
     {
         UserPhotoModel photos = UserPhotoMapper.ToModel(userPhotos);
-        await _infraDbContext.userPhotos.AddAsync(photos);
+        await _infraDbContext.UserPhotos.AddAsync(photos);
         await _infraDbContext.SaveChangesAsync();
         return true;
     }
 
     public async Task<List<UserPhotos>> GetUserPhotos(Guid userId)
     {
-        List<UserPhotoModel> userPhotos = await _infraDbContext.userPhotos
+        List<UserPhotoModel> userPhotos = await _infraDbContext.UserPhotos
             .Where(u => u.UserId == userId)
             .ToListAsync();
 

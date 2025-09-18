@@ -1,3 +1,6 @@
+using Domain.Abstractions;
+using Domain.Events;
+
 namespace Domain.Entities;
 
 public enum SexualOrientations
@@ -37,26 +40,8 @@ public class User
     public double? Latitude { get; private set; }
     public double? Longitude { get; private set; }
     public UserStatus? Status { get; private set; }
-
-    public static User Rehydrate(
-        Guid id,
-        string email,
-        string? name,
-        DateTime? birthdate,
-        string? country,
-        string? city,
-        Sexualities? sexuality,
-        SexualOrientations? sexualOrientation,
-        string? password,
-        double? height,
-        double? weight,
-        double? latitude,
-        double? longitude,
-        UserStatus? status
-        )
-    {
-        return new User(id, email, name, birthdate, country, city, sexuality, sexualOrientation, password, height, weight, latitude, longitude, status);
-    }
+    
+    private readonly List<IDomainEvents> _domainEvents = new();
 
     private User(
         Guid id,
@@ -89,8 +74,10 @@ public class User
         Latitude = latitude;
         Longitude = longitude;
         Status = status;
+        _domainEvents.Add(new UserRegistered(Id, Email));
     } 
     
+    // Factory
     public static User Create(
         string email,
         string? name,
@@ -125,6 +112,26 @@ public class User
             latitude, 
             longitude,
             status);
+    }
+    
+    public static User Rehydrate(
+        Guid id,
+        string email,
+        string? name,
+        DateTime? birthdate,
+        string? country,
+        string? city,
+        Sexualities? sexuality,
+        SexualOrientations? sexualOrientation,
+        string? password,
+        double? height,
+        double? weight,
+        double? latitude,
+        double? longitude,
+        UserStatus? status
+        )
+    {
+        return new User(id, email, name, birthdate, country, city, sexuality, sexualOrientation, password, height, weight, latitude, longitude, status);
     }
     
     private static string ValidateLocation(string value)
@@ -188,4 +195,7 @@ public class User
             Status = newStatus;
         }
     }
+    
+    public IReadOnlyCollection<IDomainEvents> DomainEvents => _domainEvents.AsReadOnly();
+    public void ClearDomainEvents() => _domainEvents.Clear();
 }

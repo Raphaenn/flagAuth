@@ -40,4 +40,8 @@
       </Content>
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="Middlewares\KafkaConfig.cs" />
+    </ItemGroup>
+
 </Project>

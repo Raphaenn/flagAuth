@@ -5,9 +5,9 @@ namespace Infra.Mappers;
 
 public static class UserMapper
 {
-    public static UserView ToEntity(User domain)
+    public static UserDbModel ToEntity(User domain)
     {
-        return new UserView
+        return new UserDbModel
         {
             Id = domain.Id,
             Name = domain.Name,
