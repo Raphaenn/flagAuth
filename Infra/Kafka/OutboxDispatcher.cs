@@ -1,14 +1,11 @@
-// Infrastructure/Messaging/Kafka/OutboxDispatcher.cs
-
 using Confluent.Kafka;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using System.Text;
 using System.Text.Json;
 using Infra;
-using Infra.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 // Conceito: processo em background que busca mensagens pendentes na Outbox
 // e publica no Kafka com cabeçalhos para dedupe/roteamento.
@@ -18,16 +15,21 @@ public sealed class OutboxDispatcher : BackgroundService
     private const int BatchSize = 100;
     private readonly IKafkaProducer _producer;
     private readonly KafkaOptions _kafkaOptions;
+    private readonly ILogger<OutboxDispatcher> _logger;
 
-    public OutboxDispatcher(IServiceScopeFactory scopeFactory, IKafkaProducer producer, IOptions<KafkaOptions> kafkaOptions)
+
+    public OutboxDispatcher(IServiceScopeFactory scopeFactory, IKafkaProducer producer, IOptions<KafkaOptions> kafkaOptions, ILogger<OutboxDispatcher> logger)
     {
         _scopeFactory = scopeFactory; 
         _producer = producer; 
         _kafkaOptions = kafkaOptions.Value;
+        _logger = logger;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        _logger.LogInformation("OutboxDispatcher started");
+
         while (!stoppingToken.IsCancellationRequested)
         {
             using var scope = _scopeFactory.CreateScope();
@@ -41,9 +43,11 @@ public sealed class OutboxDispatcher : BackgroundService
                 .Take(100)
                 .ToListAsync(stoppingToken);
 
+            Console.WriteLine("GET LIST");
             if (batch.Count == 0)
             {
-                await Task.Delay(500, stoppingToken);
+                Console.WriteLine("GET EMPTY LIST");
+                await Task.Delay(5000, stoppingToken);
                 continue;
             }
 
@@ -51,7 +55,8 @@ public sealed class OutboxDispatcher : BackgroundService
             {
                 try
                 {
-                    // 1) Converter o payload para string (depende do tipo da sua propriedade)
+                    Console.WriteLine("NÃO CHAMOU");
+                    // 1) Converter o payload para string
                     object payloadObj = msg.Payload; // força ser object
                     string payload = payloadObj switch
                     {
@@ -61,7 +66,6 @@ public sealed class OutboxDispatcher : BackgroundService
                         _ => msg.Payload?.ToString() ?? "{}"
                     };
 
-                    
                     // 2) Particionamento: tenta extrair uma chave (UserId) do JSON
                     var key = TryExtractKey(payload) ?? msg.Id.ToString();
                     
@@ -95,6 +99,7 @@ public sealed class OutboxDispatcher : BackgroundService
             await db.SaveChangesAsync(stoppingToken);
             await Task.Delay(50, stoppingToken); // pequeno respiro entre lotes
         }
+        _logger.LogInformation("OutboxDispatcher stopped");
     }
 
     private static string? TryExtractKey(string payload)
@@ -105,7 +110,10 @@ public sealed class OutboxDispatcher : BackgroundService
             using var doc = System.Text.Json.JsonDocument.Parse(payload);
             if (doc.RootElement.TryGetProperty("UserId", out var id)) return id.GetGuid().ToString();
         }
-        catch { }
+        catch
+        {
+            // throw new Exception("Invalid payload");
+        }
         return null;
     }
 }

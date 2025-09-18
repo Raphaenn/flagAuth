@@ -3,6 +3,7 @@ using App.IRepository;
 using App.Services;
 using App.Users.Queries;
 using Infra;
+using Infra.Kafka;
 using Infra.Messaging;
 using Infra.Repository;
 using Microsoft.EntityFrameworkCore;

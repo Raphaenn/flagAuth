@@ -1,13 +1,13 @@
-using Confluent.Kafka;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 using System.Text;
 using App.Users.Integration;
-using Infra;
+using Confluent.Kafka;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 // Conceito: consome tópicos, garante idempotência e atualiza read-model.
+namespace Infra.Kafka;
 public sealed class UserEventsConsumer : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;
@@ -42,8 +42,8 @@ public sealed class UserEventsConsumer : BackgroundService
 
                 var cr = consumer.Consume(stoppingToken);
 
-                var eventType = GetHeader(cr.Message.Headers, "event_type");
-                var eventId   = GetHeader(cr.Message.Headers, "event_id");
+                var eventType = GetHeader(cr.Message.Headers, "event-type");
+                var eventId   = GetHeader(cr.Message.Headers, "event-id");
 
                 using var scope = _scopeFactory.CreateScope();
                 var proj = scope.ServiceProvider.GetRequiredService<IUserProjectionWriter>();
@@ -58,7 +58,7 @@ public sealed class UserEventsConsumer : BackgroundService
                 {
                     case nameof(UserCreatedIntegrationEvent):
                         var evt = System.Text.Json.JsonSerializer
-                                   .Deserialize<UserCreatedIntegrationEvent>(cr.Message.Value)!;
+                            .Deserialize<UserCreatedIntegrationEvent>(cr.Message.Value)!;
                         await proj.UpsertAsync(evt.UserId, evt.Email, stoppingToken);
                         break;
                     // outros eventos… (UserUpdated, etc.)

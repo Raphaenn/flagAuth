@@ -5,7 +5,6 @@ using NSwag.Generation.Processors.Security;
 using Infra;
 
 var builder = WebApplication.CreateBuilder(args);
-
 builder.Services.AddJwtAuthenticationAlternative();
 // builder.Services.AddJwtAuthentication(secretKey);
 builder.Services.RegisterServices(builder.Configuration);

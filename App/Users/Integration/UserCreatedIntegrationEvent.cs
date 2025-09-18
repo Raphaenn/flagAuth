@@ -2,4 +2,4 @@
 
 namespace App.Users.Integration;
 
-public sealed record UserCreatedIntegrationEvent(Guid UserId, string Email) : IntegrationEvent;
+public sealed record UserCreatedIntegrationEvent(Guid UserId, string Email) : IntegrationEvent(UserId);

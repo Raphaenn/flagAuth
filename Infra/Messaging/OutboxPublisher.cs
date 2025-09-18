@@ -17,7 +17,7 @@ public class OutboxPublisher : IIntegrationEventPublisher
         {
             Id = Guid.NewGuid(),
             Type = "user.created",
-            Payload = JsonDocument.Parse(json),  // 👈
+            Payload = JsonDocument.Parse(json),
             OccurredOn = DateTime.UtcNow
         };
 
