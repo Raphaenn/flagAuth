@@ -43,10 +43,8 @@ public sealed class OutboxDispatcher : BackgroundService
                 .Take(100)
                 .ToListAsync(stoppingToken);
 
-            Console.WriteLine("GET LIST");
             if (batch.Count == 0)
             {
-                Console.WriteLine("GET EMPTY LIST");
                 await Task.Delay(5000, stoppingToken);
                 continue;
             }
@@ -55,7 +53,6 @@ public sealed class OutboxDispatcher : BackgroundService
             {
                 try
                 {
-                    Console.WriteLine("NÃO CHAMOU");
                     // 1) Converter o payload para string
                     object payloadObj = msg.Payload; // força ser object
                     string payload = payloadObj switch
@@ -72,8 +69,8 @@ public sealed class OutboxDispatcher : BackgroundService
                     // 3) Cabeçalhos úteis
                     var headers = new Headers
                     {
-                        new Header("event-id",    System.Text.Encoding.UTF8.GetBytes(msg.Id.ToString())),
-                        new Header("event-type",  System.Text.Encoding.UTF8.GetBytes(msg.Type)),
+                        new Header("event-id", System.Text.Encoding.UTF8.GetBytes(msg.Id.ToString())),
+                        new Header("event-type", System.Text.Encoding.UTF8.GetBytes(msg.Type)),
                         new Header("occurred-on", System.Text.Encoding.UTF8.GetBytes(msg.OccurredOn.ToUniversalTime().ToString("O")))
                     };
                     

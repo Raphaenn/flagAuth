@@ -1,6 +1,7 @@
 using System.Text;
 using App.Users.Integration;
 using Confluent.Kafka;
+using Confluent.Kafka.Admin;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -32,7 +33,18 @@ public sealed class UserEventsConsumer : BackgroundService
             EnableAutoCommit = false               // commit manual
         };
 
-        using var consumer = new ConsumerBuilder<string, string>(cfg).Build();
+        // using var consumer = new ConsumerBuilder<string, string>(cfg).Build();
+        IConsumer<string, string>? consumer = null;
+        consumer = new ConsumerBuilder<string, string>(cfg)
+            .SetErrorHandler((_, e) => _logger.LogWarning("Consumer error: {Reason}", e.Reason))
+            .SetPartitionsAssignedHandler((_, parts) =>
+                _logger.LogInformation("Assigned: {Parts}", string.Join(",", parts)))
+            .SetPartitionsRevokedHandler((_, parts) =>
+                _logger.LogInformation("Revoked: {Parts}", string.Join(",", parts)))
+            .Build();
+        
+        await EnsureTopicAsync(_opt.BootstrapServers, _opt.UserTopic, partitions: 6, rf: 1);
+
         consumer.Subscribe(_opt.UserTopic);
 
         while (!stoppingToken.IsCancellationRequested)
@@ -80,5 +92,19 @@ public sealed class UserEventsConsumer : BackgroundService
         return h.TryGetLastBytes(key, out var bytes) && bytes is not null
             ? Encoding.UTF8.GetString(bytes)
             : string.Empty; // ou lance uma exceção se o header for obrigatório
+    }
+    
+    public static async Task EnsureTopicAsync(string bootstrap, string topic, int partitions = 6, short rf = 1)
+    {
+        using var admin = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = bootstrap }).Build();
+        try
+        {
+            await admin.CreateTopicsAsync(new[] {
+                new TopicSpecification { Name = topic, NumPartitions = partitions, ReplicationFactor = rf }
+            });
+        }
+        catch (CreateTopicsException ex) when (ex.Results[0].Error.Code == ErrorCode.TopicAlreadyExists)
+        {
+        }
     }
 }

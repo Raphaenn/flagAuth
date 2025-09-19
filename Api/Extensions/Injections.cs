@@ -34,7 +34,6 @@ public static class Injections
         serviceCollection.AddHostedService<OutboxDispatcher>();  // publica Outbox → Kafka
         serviceCollection.AddHostedService<UserEventsConsumer>(); // consome Kafka → ReadModel
 
-
         return serviceCollection;
     }
 }
