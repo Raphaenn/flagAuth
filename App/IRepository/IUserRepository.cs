@@ -13,4 +13,6 @@ public interface IUserRepository
     Task<Boolean> UpdateUser(User user);
 
     Task ChangeUserStatus(User user);
+
+    Task UpdateLocation(string id, string location);
 }

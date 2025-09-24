@@ -18,15 +18,15 @@ public class PreferencesRepository : IPreferencesRepository
     public async Task CreatePreferences(Preferences preference)
     {
         PreferencesModel parsedPref =  PreferenceMapper.ToModel(preference);
-        await _infraDbContext.preferences.AddAsync(parsedPref);
+        await _infraDbContext.Preferences.AddAsync(parsedPref);
         await _infraDbContext.SaveChangesAsync();
     }
 
     public async Task<Preferences?> GetUserPreferences(Guid userId)
     {
-        if (_infraDbContext.preferences != null)
+        if (_infraDbContext.Preferences != null)
         {
-            PreferencesModel? pref = await _infraDbContext.preferences.Where(p => p.UserId == userId).FirstOrDefaultAsync();
+            PreferencesModel? pref = await _infraDbContext.Preferences.Where(p => p.UserId == userId).FirstOrDefaultAsync();
             if (pref == null)
                 return null;
             

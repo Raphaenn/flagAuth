@@ -17,7 +17,7 @@ public class FriendRepository : IFriendRepository
     public async Task<Guid> AddFriend(Friends friends)
     {
         FriendsDbModel entity = FriendMapper.ToEntity(friends);
-        await _infraDbContext.friends.AddAsync(entity);
+        await _infraDbContext.Friends.AddAsync(entity);
         await _infraDbContext.SaveChangesAsync();
         return friends.Id;
     }

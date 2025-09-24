@@ -2,7 +2,7 @@ using Domain.Entities;
 
 namespace Infra.Models;
 
-public class UserView
+public class UserDbModel
 {
     public Guid Id { get; set; }
     public string Email { get; set; }
@@ -17,5 +17,8 @@ public class UserView
     public double? Weight { get; set; }
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
+    
     public UserStatus? Status { get; set; }
+    
+    public ICollection<UserPhotoModel> Photos { get; set; } = new List<UserPhotoModel>();
 }

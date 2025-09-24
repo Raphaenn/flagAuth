@@ -5,9 +5,9 @@ namespace Infra.Mappers;
 
 public static class UserMapper
 {
-    public static UserView ToEntity(User domain)
+    public static UserDbModel ToEntity(User domain)
     {
-        return new UserView
+        return new UserDbModel
         {
             Id = domain.Id,
             Name = domain.Name,
@@ -22,7 +22,7 @@ public static class UserMapper
         };
     }
 
-    public static User ToDomain(UserView entity)
+    public static User ToDomain(UserDbModel entity)
     {
         var user = User.Rehydrate(
             id: entity.Id,

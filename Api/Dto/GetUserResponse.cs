@@ -28,7 +28,7 @@ public class GetUserResponse
     public double? Weight { get; set; }
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
-    public string Status { get; set; }
+    public UserStatus? Status { get; set; }
     
     public List<UserPhotos?>? Pics { get; set; } 
     

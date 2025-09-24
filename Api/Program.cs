@@ -2,13 +2,15 @@ using Api.Extensions;
 using Api.Middlewares;
 using NSwag;
 using NSwag.Generation.Processors.Security;
+using Infra;
 
 var builder = WebApplication.CreateBuilder(args);
-
 builder.Services.AddJwtAuthenticationAlternative();
 // builder.Services.AddJwtAuthentication(secretKey);
-builder.Services.RegisterServices();
+builder.Services.RegisterServices(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 
 builder.Services.AddOpenApiDocument(config =>
 {

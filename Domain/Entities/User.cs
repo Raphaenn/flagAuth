@@ -1,3 +1,6 @@
+using Domain.Abstractions;
+using Domain.Events;
+
 namespace Domain.Entities;
 
 public enum SexualOrientations
@@ -15,9 +18,13 @@ public enum Sexualities
 
 public enum UserStatus
 {
+    // has no name, pass
     Inactive = 0,
+    // has photos
     Incomplete = 1,
+    // Missing preferences
     SemiComplete = 2,
+    // Completed
     Active = 3,
 }
 
@@ -37,26 +44,8 @@ public class User
     public double? Latitude { get; private set; }
     public double? Longitude { get; private set; }
     public UserStatus? Status { get; private set; }
-
-    public static User Rehydrate(
-        Guid id,
-        string email,
-        string? name,
-        DateTime? birthdate,
-        string? country,
-        string? city,
-        Sexualities? sexuality,
-        SexualOrientations? sexualOrientation,
-        string? password,
-        double? height,
-        double? weight,
-        double? latitude,
-        double? longitude,
-        UserStatus? status
-        )
-    {
-        return new User(id, email, name, birthdate, country, city, sexuality, sexualOrientation, password, height, weight, latitude, longitude, status);
-    }
+    
+    private readonly List<IDomainEvents> _domainEvents = new();
 
     private User(
         Guid id,
@@ -91,6 +80,7 @@ public class User
         Status = status;
     } 
     
+    // Factory
     public static User Create(
         string email,
         string? name,
@@ -125,6 +115,26 @@ public class User
             latitude, 
             longitude,
             status);
+    }
+    
+    public static User Rehydrate(
+        Guid id,
+        string email,
+        string? name,
+        DateTime? birthdate,
+        string? country,
+        string? city,
+        Sexualities? sexuality,
+        SexualOrientations? sexualOrientation,
+        string? password,
+        double? height,
+        double? weight,
+        double? latitude,
+        double? longitude,
+        UserStatus? status
+        )
+    {
+        return new User(id, email, name, birthdate, country, city, sexuality, sexualOrientation, password, height, weight, latitude, longitude, status);
     }
     
     private static string ValidateLocation(string value)
@@ -173,6 +183,11 @@ public class User
         if (Status == newStatus)
             throw new ArgumentException("Invalid status change");
 
+        if (Status == UserStatus.Inactive && newStatus == UserStatus.Incomplete)
+        {
+            Status = newStatus;
+        }
+        
         if (Status == UserStatus.Incomplete && newStatus == UserStatus.SemiComplete)
         {
             Status = newStatus;
@@ -182,10 +197,8 @@ public class User
         {
             Status = newStatus;
         }
-        
-        if (Status == UserStatus.Active && newStatus == UserStatus.Inactive)
-        {
-            Status = newStatus;
-        }
     }
+    
+    public IReadOnlyCollection<IDomainEvents> DomainEvents => _domainEvents.AsReadOnly();
+    public void ClearDomainEvents() => _domainEvents.Clear();
 }

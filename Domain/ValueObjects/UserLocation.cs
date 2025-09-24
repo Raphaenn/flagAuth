@@ -14,5 +14,3 @@ public abstract class UserLocation
         City = city;
     }
 }
-
-// todo - Implement on Domain

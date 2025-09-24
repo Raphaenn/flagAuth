@@ -18,9 +18,9 @@ public class UserRepository : IUserRepository
 
     public async Task<User?> GetUser(string email)
     {
-        if (_infraDbContext.users_view != null)
+        if (_infraDbContext.UsersView != null)
         {
-            UserView? response = await _infraDbContext.users_view
+            UserDbModel? response = await _infraDbContext.UserWriteModel
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Email == email);
 
@@ -48,82 +48,76 @@ public class UserRepository : IUserRepository
 
     public async Task<Guid> CreateUser(User user)
     {
-        try
-        {
-            var request = UserMapper.ToEntity(user);
-            await _infraDbContext.users.AddAsync(request);
-            await _infraDbContext.SaveChangesAsync();
-            return user.Id;
-        }
-        catch (Exception e)
-        {
-            throw new Exception(e.Message);
-        }
+        var request = UserMapper.ToEntity(user);
+        await _infraDbContext.UserWriteModel.AddAsync(request);
+        return request.Id;
     }
 
     public async Task<Boolean> UpdateUser(User user)
     {
-        try
+        UserDbModel? entity = await _infraDbContext.UserWriteModel!.FindAsync(user.Id);
+        if (entity != null)
         {
-            var entity = await _infraDbContext.users!.FindAsync(user.Id);
-            if (entity != null)
-            {
-                entity.Name = user.Name;
-                entity.Birthdate = user.Birthdate;
-                entity.Country = user.Country;
-                entity.City = user.City;
-                entity.Sexuality = user.Sexuality.ToString();
-                entity.SexualOrientation = user.SexualOrientation.ToString();
-                entity.Password = user.Password;
-                entity.Height = user.Height;
-                entity.Weight = user.Weight;
-                entity.Latitude = user.Latitude;
-                entity.Longitude = user.Longitude;
-            }
+            entity.Name = user.Name;
+            entity.Birthdate = user.Birthdate;
+            entity.Country = user.Country;
+            entity.City = user.City;
+            entity.Sexuality = user.Sexuality.ToString();
+            entity.SexualOrientation = user.SexualOrientation.ToString();
+            entity.Password = user.Password;
+            entity.Height = user.Height;
+            entity.Weight = user.Weight;
+            entity.Latitude = user.Latitude;
+            entity.Longitude = user.Longitude;
+            entity.Status = user.Status;
+        }
 
-            await _infraDbContext.SaveChangesAsync();
-            return true;
-        }
-        catch (Exception e)
-        {
-            throw new Exception($"Erro ao tentar atualizar usuário: {e.Message}");
-        }
+        await _infraDbContext.SaveChangesAsync();
+        return true;
     }
 
     public async Task<User> GetUserById(string id)
     {
-        try
+        if (!Guid.TryParse(id, out Guid guidId))
+            throw new ArgumentException("Invalid id");
+
+        UserDbModel? response = await _infraDbContext.UserWriteModel!
+            .AsNoTracking().FirstOrDefaultAsync(u => u.Id == guidId);
+        if (response == null)
         {
-            if (!Guid.TryParse(id, out Guid guidId))
-                throw new ArgumentException("Invalid id");
-
-            UserView? response = await _infraDbContext.users_view!
-                .AsNoTracking().FirstOrDefaultAsync(u => u.Id == guidId);
-            if (response == null)
-            {
-                throw new Exception("User not found");
-            }
-
-            User user = UserMapper.ToDomain(response);
-
-            return user;
-
+            throw new Exception("User not found");
         }
-        catch (Exception e)
-        {
-            throw new Exception(e.Message);
-        }
+
+        User user = UserMapper.ToDomain(response);
+
+        return user;
     }
 
     public async Task ChangeUserStatus(User user)
     {
-        if (_infraDbContext.users != null)
+        if (_infraDbContext.UserWriteModel != null)
         {
-            UserView parsedUser = UserMapper.ToEntity(user);
-            _infraDbContext.users.Update(parsedUser);
+            UserDbModel parsedUser = UserMapper.ToEntity(user);
+            _infraDbContext.UserWriteModel.Update(parsedUser);
             await _infraDbContext.SaveChangesAsync();
             return;
         }
         return;
+    }
+
+    public async Task UpdateLocation(string id, string location)
+    {
+        if (!Guid.TryParse(id, out Guid guidId))
+            throw new ArgumentException("Invalid id");
+
+        if (_infraDbContext.UserWriteModel != null)
+        {
+            var user = await _infraDbContext.UserWriteModel.FindAsync(guidId);
+            if (user is null) return;
+
+            user.City = location;
+        }
+
+        await _infraDbContext.SaveChangesAsync();
     }
 }

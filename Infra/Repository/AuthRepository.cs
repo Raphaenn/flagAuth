@@ -43,7 +43,7 @@ public class AuthRepository : IAuthRepository
                 ExpireAt = DateTime.UtcNow,
                 CreatedAt = DateTime.UtcNow
             };
-            await _infraDbContext.login.AddAsync(login);
+            await _infraDbContext.Login.AddAsync(login);
             await _infraDbContext.SaveChangesAsync();
         }
         catch (Exception e)

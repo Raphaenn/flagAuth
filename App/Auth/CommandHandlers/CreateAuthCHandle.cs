@@ -3,6 +3,7 @@ using App.IRepository;
 using App.Services;
 using Domain;
 using Domain.Entities;
+using Domain.Factory;
 using MediatR;
 
 namespace App.Auth.CommandHandlers;
@@ -20,7 +21,7 @@ public class CreateAuthCHandle : IRequestHandler<CreateAuthCommand, string>
     {
         try
         {
-            User userData = UserUseCase.CreateWithExistingId(request.Id, request.Email);
+            User userData = UserFactory.CreateWithExistingId(request.Id, request.Email);
             string token = await TokenGenerator.CreateToken(userData);
             await _authRepository.CreateSocialAuth(userData, token);
             return token;
