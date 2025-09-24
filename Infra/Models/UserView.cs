@@ -17,8 +17,5 @@ public class UserView
     public double? Weight { get; set; }
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
-    
     public UserStatus? Status { get; set; }
-    
-    public ICollection<UserPhotoModel> Photos { get; set; } = new List<UserPhotoModel>();
 }

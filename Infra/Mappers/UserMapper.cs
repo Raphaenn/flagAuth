@@ -22,7 +22,7 @@ public static class UserMapper
         };
     }
 
-    public static User ToDomain(UserView entity)
+    public static User ToDomain(UserDbModel entity)
     {
         var user = User.Rehydrate(
             id: entity.Id,

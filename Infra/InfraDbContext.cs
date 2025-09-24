@@ -155,8 +155,8 @@ public class InfraDbContext : DbContext, IUnitOfWork
         });
     }
     
-    public DbSet<UserView>? UsersView { get; set; }
     public DbSet<UserDbModel>? UserWriteModel { get; set; }
+    public DbSet<UserView>? UsersView { get; set; }
     public DbSet<Login>? Login { get; set; }
     public DbSet<FriendsDbModel>? Friends { get; set; }
     public DbSet<UserPhotoModel>? UserPhotos { get; set; }

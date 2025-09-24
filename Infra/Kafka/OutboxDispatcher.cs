@@ -110,6 +110,7 @@ public sealed class OutboxDispatcher : BackgroundService
         catch
         {
             // throw new Exception("Invalid payload");
+            throw new Exception("Invalid payload");
         }
         return null;
     }

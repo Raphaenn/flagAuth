@@ -1,14 +1,9 @@
 using Domain.Entities;
 
-namespace Domain;
+namespace Domain.DomainServices;
 
-public static class UserUseCase
+public class UserService
 {
-    public static User CreateNewUser(string name, string email)
-    {
-        return User.Create(email: email, name, null, null, null, null, null, null, null, null, null, null, UserStatus.Incomplete);
-    }
-
     public static User CreateWithExistingId(Guid id, string email)
     {
         return User.Rehydrate(id: id,
@@ -25,6 +20,6 @@ public static class UserUseCase
             latitude: null, 
             longitude: null,
             status: UserStatus.Incomplete
-            );
+        );
     }
 }
