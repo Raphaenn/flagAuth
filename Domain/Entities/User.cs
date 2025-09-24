@@ -18,9 +18,13 @@ public enum Sexualities
 
 public enum UserStatus
 {
+    // has no name, pass
     Inactive = 0,
+    // has photos
     Incomplete = 1,
+    // Missing preferences
     SemiComplete = 2,
+    // Completed
     Active = 3,
 }
 
@@ -74,7 +78,6 @@ public class User
         Latitude = latitude;
         Longitude = longitude;
         Status = status;
-        _domainEvents.Add(new UserRegistered(Id, Email));
     } 
     
     // Factory
@@ -180,17 +183,17 @@ public class User
         if (Status == newStatus)
             throw new ArgumentException("Invalid status change");
 
+        if (Status == UserStatus.Inactive && newStatus == UserStatus.Incomplete)
+        {
+            Status = newStatus;
+        }
+        
         if (Status == UserStatus.Incomplete && newStatus == UserStatus.SemiComplete)
         {
             Status = newStatus;
         }
 
         if (Status == UserStatus.SemiComplete && newStatus == UserStatus.Active)
-        {
-            Status = newStatus;
-        }
-        
-        if (Status == UserStatus.Active && newStatus == UserStatus.Inactive)
         {
             Status = newStatus;
         }

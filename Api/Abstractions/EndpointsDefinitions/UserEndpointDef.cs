@@ -17,7 +17,7 @@ public class UserEndpointDef : IEndpointsDefinitions
     
     private record struct ChangeStatus(string Status);
 
-    private record struct GetUserRequest(string Id);
+    private record struct UpdateLocation(string Location);
     
     public void RegisterEndpoints(WebApplication app)
     {
@@ -51,7 +51,7 @@ public class UserEndpointDef : IEndpointsDefinitions
                 Weight = user.Weight,
                 Latitude = user.Latitude,
                 Longitude = user.Longitude,
-                Status = user.Status.ToString(),
+                Status = user.Status,
                 Pics = photos
             };
             return Results.Ok(parsedRes);
@@ -68,7 +68,7 @@ public class UserEndpointDef : IEndpointsDefinitions
 
                 var hasher = new PasswordHasher<object>();
                 string passwordHash = hasher.HashPassword(null, request.Password);
-
+                Console.WriteLine(request.Status);
                 UpdateUserCommand completeUser = new UpdateUserCommand
                 {
                     Id = request.Id,
@@ -82,7 +82,8 @@ public class UserEndpointDef : IEndpointsDefinitions
                     Height = request.Height,
                     Weight = request.Weight,
                     Latitude = request.Latitude,
-                    Longitude = request.Longitude
+                    Longitude = request.Longitude,
+                    Status = request.Status
                 };
 
                 User user = await mediator.Send(completeUser);
@@ -110,6 +111,7 @@ public class UserEndpointDef : IEndpointsDefinitions
 
                 Guid parsedUserId = Guid.Parse(userId);
                 UserStatus status = Enum.Parse<UserStatus>(request.Status, ignoreCase: true);
+                Console.WriteLine(status);
 
                 ChangeUserStatusCommand cmd = new ChangeUserStatusCommand(parsedUserId, status);
                 User res = await mediator.Send(cmd);
@@ -170,6 +172,20 @@ public class UserEndpointDef : IEndpointsDefinitions
             
             return Results.Ok(res);
         }).RequireAuthorization();
+
+        app.MapPut("/user/location/{id}", async (IMediator mediator, UpdateLocation body, string id) =>
+        {
+            try
+            {
+                UpdateUserLocationCommand cmd = new UpdateUserLocationCommand(id, body.Location);
+                await mediator.Send(cmd);
+                return Results.Ok();
+            }
+            catch (Exception e)
+            {
+                return Results.BadRequest(e.Message);
+            }
+        });
 
         // app.MapDelete("user/photo/:id", async (HttpContext ContextCallback, IMediator mediator) =>
         // {
