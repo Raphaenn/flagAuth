@@ -149,7 +149,6 @@ public class InfraDbContext : DbContext, IUnitOfWork
         {
             entity.ToTable("processed_messages");
             entity.HasKey(x => x.EventId);
-            entity.HasKey(x => x.EventId);
             entity.Property(x => x.EventId).HasColumnName("event_id");
             entity.Property(x => x.ProcessedAt).HasColumnName("processed_at");
         });

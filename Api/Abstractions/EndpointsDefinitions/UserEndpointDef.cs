@@ -18,6 +18,9 @@ public class UserEndpointDef : IEndpointsDefinitions
     private record struct ChangeStatus(string Status);
 
     private record struct UpdateLocation(string Location);
+    private record struct ChangeName(string UserId, string Name);
+    private record struct ChangeEmail(string Email);
+    private record struct ChangePassword(string UserId, string OldPass, string NewPass);
     
     public void RegisterEndpoints(WebApplication app)
     {
@@ -68,7 +71,6 @@ public class UserEndpointDef : IEndpointsDefinitions
 
                 var hasher = new PasswordHasher<object>();
                 string passwordHash = hasher.HashPassword(null, request.Password);
-                Console.WriteLine(request.Status);
                 UpdateUserCommand completeUser = new UpdateUserCommand
                 {
                     Id = request.Id,
@@ -94,6 +96,61 @@ public class UserEndpointDef : IEndpointsDefinitions
             {
                 Console.WriteLine(e.Message);
                 throw new Exception(e.Message);
+            }
+        });
+        
+        app.MapPut("/user/change-name", async (HttpContext context, IMediator mediator, CancellationToken ct) =>
+        {
+            try
+            {
+                var request = await context.Request.ReadFromJsonAsync<ChangeName>(ct);
+                
+                if (string.IsNullOrWhiteSpace(request.Name))
+                    return Results.BadRequest("Name cannot be empty");
+
+                UpdateUserNameCommand userCommand = new UpdateUserNameCommand(Guid.Parse(request.UserId), request.Name);
+
+                bool res = await mediator.Send(userCommand, ct);
+
+                if (!res)
+                {
+                    throw new Exception("Invalid argument");
+                }
+
+                return Results.Ok(res);
+            }
+            catch (Exception e)
+            {
+                return Results.BadRequest(e.Message);
+            }
+        });
+        
+        app.MapPut("/user/change-password", async (HttpContext context, IMediator mediator, CancellationToken ct) =>
+        {
+            try
+            {
+                var request = await context.Request.ReadFromJsonAsync<ChangePassword>(ct);
+                
+                if (string.IsNullOrWhiteSpace(request.NewPass))
+                    return Results.BadRequest("Password cannot be empty");
+
+                var hasher = new PasswordHasher<object>();
+                string passwordHash = hasher.HashPassword(null, request.NewPass);
+
+                ChangePasswordCommand userCommand = new ChangePasswordCommand(Guid.Parse(request.UserId), request.OldPass, passwordHash);
+
+                bool res = await mediator.Send(userCommand, ct);
+
+                if (!res)
+                {
+                    throw new Exception("Invalid argument");
+                }
+
+                return Results.Ok(res);
+            }
+            catch (Exception e)
+            {
+                return Results.BadRequest(e.Message);
             }
         });
 
@@ -163,6 +220,43 @@ public class UserEndpointDef : IEndpointsDefinitions
                 return Results.BadRequest(e.Message);
             }
         }).RequireAuthorization();
+
+        app.MapPost("/admin/upload-photos/{id}", async (string id, HttpContext context, IFormFileCollection files, IMediator mediator) =>
+        {
+            var formData = context.Request.Form;
+            var profile = formData["isProfile"].ToString();
+            bool parsedIsProfile = bool.Parse(profile);
+            
+            var fileFolder = Path.Combine(Directory.GetCurrentDirectory(), "files");
+            var uploadedPhotos = new List<object>();
+
+            foreach (var file in files)
+            {
+                if (file.Length == 0)
+                {
+                    continue;
+                }
+                
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+                var fullPath = Path.Combine(fileFolder, fileName);
+                await using (var stream = new FileStream(fullPath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                var upload = new UploadUserPhotosCommand(id, fullPath, parsedIsProfile);
+                UserPhotos photo = await mediator.Send(upload);
+
+                uploadedPhotos.Add(new
+                {
+                    FilePath = $"/files/{fileName}",
+                    Data = photo
+                });
+                
+            }
+            
+            return Results.Ok(uploadedPhotos);
+        });
 
         app.MapGet("/user/photos", async (HttpContext context, IMediator mediator) =>
         {

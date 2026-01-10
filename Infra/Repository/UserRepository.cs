@@ -81,8 +81,7 @@ public class UserRepository : IUserRepository
         if (!Guid.TryParse(id, out Guid guidId))
             throw new ArgumentException("Invalid id");
 
-        UserDbModel? response = await _infraDbContext.UserWriteModel!
-            .AsNoTracking().FirstOrDefaultAsync(u => u.Id == guidId);
+        UserDbModel? response = await _infraDbContext.UserWriteModel.FirstOrDefaultAsync(u => u.Id == guidId);
         if (response == null)
         {
             throw new Exception("User not found");
@@ -120,4 +119,5 @@ public class UserRepository : IUserRepository
 
         await _infraDbContext.SaveChangesAsync();
     }
+    
 }
