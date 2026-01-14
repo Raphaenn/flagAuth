@@ -152,6 +152,16 @@ public class InfraDbContext : DbContext, IUnitOfWork
             entity.Property(x => x.EventId).HasColumnName("event_id");
             entity.Property(x => x.ProcessedAt).HasColumnName("processed_at");
         });
+        
+        modelBuilder.Entity<IssueDbModel>(entity =>
+        {
+            entity.ToTable("issues");
+            entity.HasKey(uv => uv.Id);
+            entity.Property(uv => uv.Id).HasColumnName("id");
+            entity.Property(uv => uv.UserId).HasColumnName("user_id");
+            entity.Property(uv => uv.Content).HasColumnName("content");
+            entity.Property(uv => uv.CreatedAt).HasColumnName("created_at");
+        });
     }
     
     public DbSet<UserDbModel>? UserWriteModel { get; set; }
@@ -161,6 +171,7 @@ public class InfraDbContext : DbContext, IUnitOfWork
     public DbSet<UserPhotoModel>? UserPhotos { get; set; }
     public DbSet<PreferencesModel>? Preferences { get; set; }
     public DbSet<RefreshToken>? RefreshTokens { get; set; }
+    public DbSet<IssueDbModel>? IssueDb { get; set; }
     
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
     public DbSet<ProcessedMessage> ProcessedMessages => Set<ProcessedMessage>();
