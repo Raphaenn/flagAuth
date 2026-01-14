@@ -19,7 +19,7 @@ public class UserEndpointDef : IEndpointsDefinitions
 
     private record struct UpdateLocation(string Location);
     private record struct ChangeName(string UserId, string Name);
-    private record struct ChangeEmail(string Email);
+    private record struct ChangeEmail(string UserId, string Email);
     private record struct ChangePassword(string UserId, string OldPass, string NewPass);
     
     public void RegisterEndpoints(WebApplication app)
@@ -109,6 +109,32 @@ public class UserEndpointDef : IEndpointsDefinitions
                     return Results.BadRequest("Name cannot be empty");
 
                 UpdateUserNameCommand userCommand = new UpdateUserNameCommand(Guid.Parse(request.UserId), request.Name);
+
+                bool res = await mediator.Send(userCommand, ct);
+
+                if (!res)
+                {
+                    throw new Exception("Invalid argument");
+                }
+
+                return Results.Ok(res);
+            }
+            catch (Exception e)
+            {
+                return Results.BadRequest(e.Message);
+            }
+        });
+        
+        app.MapPut("/user/change-email", async (HttpContext context, IMediator mediator, CancellationToken ct) =>
+        {
+            try
+            {
+                var request = await context.Request.ReadFromJsonAsync<ChangeEmail>(ct);
+                
+                if (string.IsNullOrWhiteSpace(request.Email))
+                    return Results.BadRequest("Name cannot be empty");
+
+                UpdateUserNameCommand userCommand = new UpdateUserNameCommand(Guid.Parse(request.UserId), request.Email);
 
                 bool res = await mediator.Send(userCommand, ct);
 
