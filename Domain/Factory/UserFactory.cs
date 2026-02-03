@@ -6,7 +6,7 @@ public static class UserFactory
 {
     public static User CreateNewUser(string name, string email)
     {
-        return User.Create(email: email, name, null, null, null, null, null, null, null, null, null, null, UserStatus.Incomplete);
+        return User.Create(email: email, name, null, null, null, null, null, null, null, null, null, null, UserStatus.Incomplete, null);
     }
 
     public static User CreateWithExistingId(Guid id, string email)
@@ -24,7 +24,8 @@ public static class UserFactory
             weight: null, 
             latitude: null, 
             longitude: null,
-            status: UserStatus.Incomplete
+            status: UserStatus.Incomplete,
+            null
         );
     }
 }

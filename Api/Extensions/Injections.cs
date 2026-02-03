@@ -23,6 +23,7 @@ public static class Injections
         serviceCollection.AddScoped<IUserPhotoRepository, UserPhotosRepository>();
         serviceCollection.AddScoped<IPreferencesRepository, PreferencesRepository>();
         serviceCollection.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        serviceCollection.AddScoped<IIssueRepository, IssueRepository>();
         serviceCollection.AddScoped<ITokenService, TokenService>();
 
         serviceCollection.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetUserQuery).Assembly));
@@ -31,8 +32,8 @@ public static class Injections
         serviceCollection.AddSingleton<IKafkaProducer, KafkaProducer>();
         serviceCollection.AddScoped<IIntegrationEventPublisher, OutboxPublisher>();
         serviceCollection.AddScoped<IUserProjectionWriter, UserProjectionWriter>();
-        serviceCollection.AddHostedService<OutboxDispatcher>();  // publica Outbox → Kafka
-        serviceCollection.AddHostedService<UserEventsConsumer>(); // consome Kafka → ReadModel
+        // serviceCollection.AddHostedService<OutboxDispatcher>();  // publica Outbox → Kafka
+        // serviceCollection.AddHostedService<UserEventsConsumer>(); // consome Kafka → ReadModel
 
         return serviceCollection;
     }

@@ -37,6 +37,8 @@ public class UpdateUserCmdHandler : IRequestHandler<UpdateUserCommand, User>
             latitude: updateUserCommand.Latitude,
             longitude: updateUserCommand.Longitude
             );
+        
+        user.ChangeStatus(UserStatus.Incomplete);
 
         await _userRepository.UpdateUser(user);
 

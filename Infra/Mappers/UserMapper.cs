@@ -18,7 +18,8 @@ public static class UserMapper
             Sexuality = domain.Sexuality.ToString(),
             SexualOrientation = domain.SexualOrientation.ToString(),
             Password = domain.Password,
-            Status = domain.Status
+            Status = domain.Status,
+            Description = domain.Description
         };
     }
 
@@ -38,7 +39,8 @@ public static class UserMapper
             weight: entity.Weight,
             latitude: entity.Latitude,
             longitude: entity.Longitude,
-            status: entity.Status
+            status: entity.Status,
+            desc: entity.Description
             );
 
         // Access private setters via reflection or use internal constructor if available

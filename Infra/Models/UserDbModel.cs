@@ -17,6 +17,7 @@ public class UserDbModel
     public double? Weight { get; set; }
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
+    public string? Description { get; set; }
     
     public UserStatus? Status { get; set; }
     
