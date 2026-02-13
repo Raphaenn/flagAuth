@@ -269,10 +269,9 @@ public class AuthEndpointDef : IEndpointsDefinitions
                     return Results.Unauthorized();
                 }
                 
-                CreateAuthCommand createToken = new CreateAuthCommand
+                CompletedAuthCommand createToken = new CompletedAuthCommand
                 {
-                    Id = user.Id,
-                    Email = user.Email,
+                   User = user
                 };
                 
                 string createdToken = await mediator.Send(createToken);

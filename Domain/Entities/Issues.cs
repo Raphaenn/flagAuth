@@ -12,7 +12,7 @@ public class Issues
         Id = id;
         UserId = userId;
         Content = content;
-        CreatedAt = CreatedAt;
+        CreatedAt = createdAt;
     }
 
     public static Issues CreateIssue(Guid userId, string content, DateTime createdAt)
