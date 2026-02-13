@@ -19,7 +19,8 @@ public class UserService
             weight: null, 
             latitude: null, 
             longitude: null,
-            status: UserStatus.Incomplete
+            status: UserStatus.Incomplete,
+            null
         );
     }
 }

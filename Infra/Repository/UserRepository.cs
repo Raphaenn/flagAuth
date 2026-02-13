@@ -39,7 +39,8 @@ public class UserRepository : IUserRepository
                     weight: response.Weight,
                     latitude: response.Latitude,
                     longitude: response.Longitude,
-                    status: response.Status
+                    status: response.Status,
+                    desc: response.Description
                 );
             }
         }
@@ -81,8 +82,7 @@ public class UserRepository : IUserRepository
         if (!Guid.TryParse(id, out Guid guidId))
             throw new ArgumentException("Invalid id");
 
-        UserDbModel? response = await _infraDbContext.UserWriteModel!
-            .AsNoTracking().FirstOrDefaultAsync(u => u.Id == guidId);
+        UserDbModel? response = await _infraDbContext.UserWriteModel.FirstOrDefaultAsync(u => u.Id == guidId);
         if (response == null)
         {
             throw new Exception("User not found");
@@ -95,14 +95,11 @@ public class UserRepository : IUserRepository
 
     public async Task ChangeUserStatus(User user)
     {
-        if (_infraDbContext.UserWriteModel != null)
-        {
-            UserDbModel parsedUser = UserMapper.ToEntity(user);
-            _infraDbContext.UserWriteModel.Update(parsedUser);
-            await _infraDbContext.SaveChangesAsync();
-            return;
-        }
-        return;
+        await _infraDbContext.UserWriteModel
+            .Where(u => u.Id == user.Id)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(u => u.Status, user.Status)
+            );
     }
 
     public async Task UpdateLocation(string id, string location)
@@ -120,4 +117,5 @@ public class UserRepository : IUserRepository
 
         await _infraDbContext.SaveChangesAsync();
     }
+    
 }

@@ -44,8 +44,9 @@ public class User
     public double? Latitude { get; private set; }
     public double? Longitude { get; private set; }
     public UserStatus? Status { get; private set; }
+    public string? Description { get; private set; }
     
-    private readonly List<IDomainEvents> _domainEvents = new();
+    // private readonly List<IDomainEvents> _domainEvents = new();
 
     private User(
         Guid id,
@@ -61,7 +62,8 @@ public class User
         double? weight,
         double? latitude,
         double? longitude,
-        UserStatus? status
+        UserStatus? status,
+        string? desc
         )
     {
         Id = id;
@@ -78,6 +80,7 @@ public class User
         Latitude = latitude;
         Longitude = longitude;
         Status = status;
+        Description = desc;
     } 
     
     // Factory
@@ -94,7 +97,8 @@ public class User
         double? weight,
         double? latitude,
         double? longitude,
-        UserStatus? status
+        UserStatus? status,
+        string? desc
         )
     {
         if (string.IsNullOrWhiteSpace(email))
@@ -114,7 +118,8 @@ public class User
             weight, 
             latitude, 
             longitude,
-            status);
+            status, 
+            desc);
     }
     
     public static User Rehydrate(
@@ -131,10 +136,11 @@ public class User
         double? weight,
         double? latitude,
         double? longitude,
-        UserStatus? status
+        UserStatus? status,
+        string? desc
         )
     {
-        return new User(id, email, name, birthdate, country, city, sexuality, sexualOrientation, password, height, weight, latitude, longitude, status);
+        return new User(id, email, name, birthdate, country, city, sexuality, sexualOrientation, password, height, weight, latitude, longitude, status, desc);
     }
     
     private static string ValidateLocation(string value)
@@ -198,7 +204,47 @@ public class User
             Status = newStatus;
         }
     }
+
+    public void ChangeName(string newName)
+    {
+        newName = newName?.Trim() ?? throw new Exception("Name required");
+        if (newName.Length < 2) throw new Exception("Name too short");
+        if (newName == Name) return;
+
+        Name = newName;
+    }
     
-    public IReadOnlyCollection<IDomainEvents> DomainEvents => _domainEvents.AsReadOnly();
-    public void ClearDomainEvents() => _domainEvents.Clear();
+    public void ChangeEmail(string newEmail)
+    {
+        newEmail = newEmail?.Trim() ?? throw new Exception("Email required");
+        if (newEmail.Length < 10) throw new Exception("Name too short");
+        if (newEmail == Email) return;
+
+        Email = newEmail;
+    }
+    
+    public void ChangePassword(string oldPassword, string newPassword)
+    {
+        newPassword = newPassword?.Trim() ?? throw new Exception("Password required");
+        if (newPassword.Length < 4) throw new Exception("Password too short");
+
+        if (oldPassword != Password)
+        {
+            throw new Exception("Old password does not match");
+        }
+
+        Password = newPassword;
+    }
+
+    public void AddUserDescription(string desc)
+    {
+        desc = desc?.Trim() ?? throw new Exception("Desc required");
+        if (desc.Length < 2) throw new Exception("Description too short");
+        if (desc == Description) return;
+
+        Description = desc;
+    }
+    
+    // public IReadOnlyCollection<IDomainEvents> DomainEvents => _domainEvents.AsReadOnly();
+    // public void ClearDomainEvents() => _domainEvents.Clear();
 }

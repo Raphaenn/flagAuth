@@ -33,6 +33,7 @@ public class InfraDbContext : DbContext, IUnitOfWork
             entity.Property(uv => uv.Latitude).HasColumnName("latitude");
             entity.Property(uv => uv.Longitude).HasColumnName("longitude");
             entity.Property(uv => uv.Status).HasColumnName("status");
+            entity.Property(uv => uv.Description).HasColumnName("description");
         });
 
         modelBuilder.Entity<Login>(entity =>
@@ -80,6 +81,7 @@ public class InfraDbContext : DbContext, IUnitOfWork
             entity.Property(uv => uv.Latitude).HasColumnName("latitude");
             entity.Property(uv => uv.Longitude).HasColumnName("longitude");
             entity.Property(uv => uv.Status).HasColumnName("status");
+            entity.Property(uv => uv.Description).HasColumnName("description");
         });
         
         modelBuilder.Entity<UserPhotoModel>(entity =>
@@ -149,9 +151,18 @@ public class InfraDbContext : DbContext, IUnitOfWork
         {
             entity.ToTable("processed_messages");
             entity.HasKey(x => x.EventId);
-            entity.HasKey(x => x.EventId);
             entity.Property(x => x.EventId).HasColumnName("event_id");
             entity.Property(x => x.ProcessedAt).HasColumnName("processed_at");
+        });
+        
+        modelBuilder.Entity<IssueDbModel>(entity =>
+        {
+            entity.ToTable("issues");
+            entity.HasKey(uv => uv.Id);
+            entity.Property(uv => uv.Id).HasColumnName("id");
+            entity.Property(uv => uv.UserId).HasColumnName("user_id");
+            entity.Property(uv => uv.Content).HasColumnName("content");
+            entity.Property(uv => uv.CreatedAt).HasColumnName("created_at");
         });
     }
     
@@ -162,6 +173,7 @@ public class InfraDbContext : DbContext, IUnitOfWork
     public DbSet<UserPhotoModel>? UserPhotos { get; set; }
     public DbSet<PreferencesModel>? Preferences { get; set; }
     public DbSet<RefreshToken>? RefreshTokens { get; set; }
+    public DbSet<IssueDbModel>? IssueDb { get; set; }
     
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
     public DbSet<ProcessedMessage> ProcessedMessages => Set<ProcessedMessage>();
