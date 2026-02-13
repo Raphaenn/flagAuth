@@ -37,14 +37,14 @@ stages:
   jobs:
   - job: Deploy
     steps:
-    - task: AzureCLI@2
-      displayName: Update Container App image
-      inputs:
-        azureSubscription: 'flags-azure-rm'     # <- NOME da sua Azure Resource Manager service connection
-        scriptType: bash
-        scriptLocation: inlineScript
-        inlineScript: |
-          az containerapp update \
-            --name $(CONTAINER_APP_NAME) \
-            --resource-group $(RESOURCE_GROUP) \
-            --image $(ACR_LOGIN_SERVER)/$(IMAGE_NAME):$(Build.BuildId)
+      - task: AzureCLI@2
+        displayName: Register required Azure providers
+        inputs:
+          azureSubscription: 'flags-azure-rm'
+          scriptType: bash
+          scriptLocation: inlineScript
+          inlineScript: |
+            az provider register -n Microsoft.App --wait
+            az provider register -n Microsoft.OperationalInsights --wait
+            az provider register -n Microsoft.Insights --wait
+            az provider register -n Microsoft.ContainerRegistry --wait
