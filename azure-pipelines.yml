@@ -22,7 +22,7 @@ stages:
             displayName: Build & Push image
             inputs:
               command: buildAndPush
-              containerRegistry: 'flagsregistry-acr'   # nome da Service Connection do ACR (Docker Registry)
+              containerRegistry: 'flagsregistry-acr'
               repository: $(IMAGE_NAME)
               Dockerfile: 'Api/Dockerfile'
               buildContext: '.'
@@ -37,18 +37,6 @@ stages:
     jobs:
       - job: Deploy
         steps:
-          - task: AzureCLI@2
-            displayName: Register required Azure providers
-            inputs:
-              azureSubscription: 'flags-azure-rm'      # nome da Service Connection (Azure Resource Manager)
-              scriptType: bash
-              scriptLocation: inlineScript
-              inlineScript: |
-                az provider register -n Microsoft.App --wait
-                az provider register -n Microsoft.OperationalInsights --wait
-                az provider register -n Microsoft.Insights --wait
-                az provider register -n Microsoft.ContainerRegistry --wait
-
           - task: AzureCLI@2
             displayName: Update Container App image
             inputs:
