@@ -12,7 +12,9 @@ public class IssuesEndpointsDef : IEndpointsDefinitions
 
     public void RegisterEndpoints(WebApplication app)
     {
-        app.MapPost("/issues/register", async (HttpContext context, IMediator mediator) =>
+        var issues = app.MapGroup("/issues");
+        
+        issues.MapPost("/register", async (HttpContext context, IMediator mediator) =>
         {
             var request = await context.Request.ReadFromJsonAsync<IssueCreateReq>();
             CreateIssueCommand userCmd = new CreateIssueCommand(request.UserId, request.Content);

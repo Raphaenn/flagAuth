@@ -17,6 +17,7 @@ public class IssueRepository : IIssueRepository
     {
         var request = IssuesMapper.ToEntity(issues);
         await _infraDbContext.IssueDb.AddAsync(request);
+        await _infraDbContext.SaveChangesAsync();
         return issues;
     }
 }
