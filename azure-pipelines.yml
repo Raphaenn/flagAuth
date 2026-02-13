@@ -1,5 +1,5 @@
 trigger:
-- main
+  - main
 
 pool:
   vmImage: ubuntu-latest
@@ -11,40 +11,52 @@ variables:
   RESOURCE_GROUP: flags
 
 stages:
-- stage: BuildAndPush
-  displayName: Build & Push
-  jobs:
-  - job: Build
-    steps:
-    - checkout: self
+  - stage: BuildAndPush
+    displayName: Build & Push
+    jobs:
+      - job: Build
+        steps:
+          - checkout: self
 
-    - task: Docker@2
-      displayName: Build & Push image
-      inputs:
-        command: buildAndPush
-        containerRegistry: 'flagsregistry-acr'   # <- NOME da sua Docker Registry service connection
-        repository: $(IMAGE_NAME)
-        Dockerfile: 'Api/Dockerfile'            # <- ajuste se seu Dockerfile estiver em outro lugar
-        buildContext: '.'                       # <- raiz do repo (precisa conter Api/ Infra/ App/ Domain/)
-        tags: |
-          $(Build.BuildId)
-          latest
+          - task: Docker@2
+            displayName: Build & Push image
+            inputs:
+              command: buildAndPush
+              containerRegistry: 'flagsregistry-acr'   # nome da Service Connection do ACR (Docker Registry)
+              repository: $(IMAGE_NAME)
+              Dockerfile: 'Api/Dockerfile'
+              buildContext: '.'
+              tags: |
+                $(Build.BuildId)
+                latest
 
-- stage: Deploy
-  displayName: Deploy to Container Apps
-  dependsOn: BuildAndPush
-  condition: succeeded()
-  jobs:
-  - job: Deploy
-    steps:
-      - task: AzureCLI@2
-        displayName: Register required Azure providers
-        inputs:
-          azureSubscription: 'flags-azure-rm'
-          scriptType: bash
-          scriptLocation: inlineScript
-          inlineScript: |
-            az provider register -n Microsoft.App --wait
-            az provider register -n Microsoft.OperationalInsights --wait
-            az provider register -n Microsoft.Insights --wait
-            az provider register -n Microsoft.ContainerRegistry --wait
+  - stage: Deploy
+    displayName: Deploy to Container Apps
+    dependsOn: BuildAndPush
+    condition: succeeded()
+    jobs:
+      - job: Deploy
+        steps:
+          - task: AzureCLI@2
+            displayName: Register required Azure providers
+            inputs:
+              azureSubscription: 'flags-azure-rm'      # nome da Service Connection (Azure Resource Manager)
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az provider register -n Microsoft.App --wait
+                az provider register -n Microsoft.OperationalInsights --wait
+                az provider register -n Microsoft.Insights --wait
+                az provider register -n Microsoft.ContainerRegistry --wait
+
+          - task: AzureCLI@2
+            displayName: Update Container App image
+            inputs:
+              azureSubscription: 'flags-azure-rm'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az containerapp update \
+                  --name $(CONTAINER_APP_NAME) \
+                  --resource-group $(RESOURCE_GROUP) \
+                  --image $(ACR_LOGIN_SERVER)/$(IMAGE_NAME):$(Build.BuildId)
